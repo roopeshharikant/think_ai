@@ -20,6 +20,18 @@ const batchRoutes =
 const enrollmentRoutes =
     require("./routes/enrollmentRoutes");
 
+const authRoutes =
+    require("./routes/authRoutes");
+
+const adminUsers =
+    require("./routes/adminUsers");
+
+const roleRoutes =
+    require("./routes/roleRoutes");
+
+const demoRoutes =
+    require("./routes/demoRoutes");
+
 const moduleRoutes =
     require("./routes/moduleRoutes");
 
@@ -48,24 +60,22 @@ const analyticsRoutes =
 // ============================================================
 // ADMIN CODING QUESTION ROUTES
 // ============================================================
-//
-// This file will contain:
-//
-// POST   /api/admin/coding-questions
-// GET    /api/admin/assessments/:assessmentId/coding-questions
-// GET    /api/admin/coding-questions/:questionId
-// PUT    /api/admin/coding-questions/:questionId
-// DELETE /api/admin/coding-questions/:questionId
-//
-// POST   /api/admin/coding-questions/:questionId/test-cases
-// GET    /api/admin/coding-questions/:questionId/test-cases
-// PUT    /api/admin/coding-test-cases/:testCaseId
-// DELETE /api/admin/coding-test-cases/:testCaseId
-//
-// ============================================================
 
 const adminCodingQuestionRoutes =
     require("./routes/adminCodingQuestionRoutes");
+
+
+// ============================================================
+// SESSION / PASSPORT
+// ============================================================
+
+const session =
+    require("express-session");
+
+const passport =
+    require("passport");
+
+require("./config/passport");
 
 
 // ============================================================
@@ -95,6 +105,41 @@ app.use(
 
 app.use(
     morgan("dev")
+);
+
+
+// ============================================================
+// SESSION
+// ============================================================
+
+app.use(
+    session({
+        secret:
+            process.env.SESSION_SECRET ||
+            "your_secret_fallback",
+
+        resave: false,
+
+        saveUninitialized: false
+    })
+);
+
+app.use(
+    passport.initialize()
+);
+
+app.use(
+    passport.session()
+);
+
+
+// ============================================================
+// DEMO ROUTES
+// ============================================================
+
+app.use(
+    "/api/demo",
+    demoRoutes
 );
 
 
@@ -190,6 +235,25 @@ app.get(
 );
 
 
+app.get(
+    "/api/health",
+    (req, res) => {
+
+        return res.status(200).json({
+
+            status:
+                "healthy",
+
+            service:
+                "think-ai-backend",
+
+            timestamp:
+                new Date().toISOString()
+        });
+    }
+);
+
+
 // ============================================================
 // CERTIFICATE STATIC FILES
 // ============================================================
@@ -236,6 +300,36 @@ app.use(
 
 
 // ============================================================
+// AUTH ROUTES
+// ============================================================
+
+app.use(
+    "/api/auth",
+    authRoutes
+);
+
+
+// ============================================================
+// ADMIN USER ROUTES
+// ============================================================
+
+app.use(
+    "/api/admin",
+    adminUsers
+);
+
+
+// ============================================================
+// ROLE ROUTES
+// ============================================================
+
+app.use(
+    "/api/roles",
+    roleRoutes
+);
+
+
+// ============================================================
 // MODULE ROUTES
 // ============================================================
 
@@ -278,15 +372,6 @@ app.use(
 // ============================================================
 // ASSESSMENT ROUTES
 // ============================================================
-//
-// Existing:
-//
-// POST /api/assessments
-// GET  /api/assessments/:id
-// GET  /api/assessments/:id/analytics
-// POST /api/assessments/:id/submit
-//
-// ============================================================
 
 app.use(
     "/api/assessments",
@@ -297,21 +382,6 @@ app.use(
 // ============================================================
 // ADMIN CODING QUESTION ROUTES
 // ============================================================
-//
-// New:
-//
-// POST   /api/admin/coding-questions
-// GET    /api/admin/assessments/:assessmentId/coding-questions
-// GET    /api/admin/coding-questions/:questionId
-// PUT    /api/admin/coding-questions/:questionId
-// DELETE /api/admin/coding-questions/:questionId
-//
-// POST   /api/admin/coding-questions/:questionId/test-cases
-// GET    /api/admin/coding-questions/:questionId/test-cases
-// PUT    /api/admin/coding-test-cases/:testCaseId
-// DELETE /api/admin/coding-test-cases/:testCaseId
-//
-// ============================================================
 
 app.use(
     "/api/admin",
@@ -321,14 +391,6 @@ app.use(
 
 // ============================================================
 // CODE EXECUTION / JUDGE0
-// ============================================================
-//
-// Existing:
-//
-// POST /api/code/execute
-// PUT  /api/code/callback
-// GET  /api/code/submissions/:submissionId
-//
 // ============================================================
 
 app.use(

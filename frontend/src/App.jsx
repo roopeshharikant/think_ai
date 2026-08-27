@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "./components/ThemeContext";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -9,6 +10,7 @@ import LandingPage from "./pages/public/Landingpage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AppRoutes from "./routes/AppRoutes";
 import LearnerRoutes from "./routes/LearnerRoutes";
+import AdminRoutes from "./routes/AdminRoutes";
 
 function RolePlaceholder({ label }) {
   return (
@@ -86,7 +88,7 @@ function App() {
       <Route
         path="/learner/*"
         element={
-          <ProtectedRoute allowedRoles={["Learner"]}>
+          <ProtectedRoute allowedRoles={["Learner", "Admin"]}>
             <LearnerRoutes />
           </ProtectedRoute>
         }

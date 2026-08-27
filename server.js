@@ -97,9 +97,6 @@ const swaggerOptions = {
     apis: ['./server.js'], // Instructs compiler to parse code block tags inside this file
 };
 
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 // -------------------------------------------------------------
 // 🛣️ INTEGRATED ENDPOINTS PATHWAY MAPPINGS (Prefix: /api)
 // -------------------------------------------------------------

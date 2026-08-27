@@ -15,3 +15,4 @@ export const updateLesson = (id, payload) =>
   axiosInstance.put(`${BASE_URL}/${id}`, payload);
 
 export const deleteLesson = (id) => axiosInstance.delete(`${BASE_URL}/${id}`);
+

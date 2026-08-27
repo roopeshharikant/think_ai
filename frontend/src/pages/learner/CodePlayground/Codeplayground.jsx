@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
 import { useTheme } from '../../../components/ThemeContext';
-import { runCode } from '../../../api/codeExecutionApi';
+import { executeCode  } from '../../../api/codeExecutionApi';
 
 const LANGUAGES = [
   { id: 'javascript', label: 'JavaScript', monacoId: 'javascript' },
@@ -46,7 +46,7 @@ export default function CodePlayground() {
     setOutput('');
 
     try {
-      const result = await runCode({ language, code });
+     const result = await executeCode({ language, code });
       const combined = [result.stdout, result.stderr].filter(Boolean).join('\n');
       setStatus(result.exitCode === 0 ? 'success' : 'error');
       setOutput(combined || (result.exitCode === 0 ? '(no output)' : 'Execution failed.'));

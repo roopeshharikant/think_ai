@@ -64,7 +64,7 @@ function CourseCard({ enrollment, navigate }) {
       <div className="flex flex-col justify-between h-full space-y-6 pl-2">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="font-mono text-xs uppercase tracking-wider text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-full">
+            <span className="font-mono text-xs uppercase tracking-wider dark:text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-full">
               BATCH: {enrollment.batch?.name || 'Standard'}
             </span>
             <span className="font-mono text-xs text-[var(--text-secondary)]">
@@ -180,10 +180,6 @@ export default function LearnerDashboard() {
         
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <SparklesIcon />
-              <span className="font-mono text-xs uppercase tracking-widest text-purple-400">// Next-Gen Learner Portal</span>
-            </div>
             <h1 className="text-3xl md:text-4xl font-black tracking-tight text-[var(--text-primary)]">
               Dashboard &amp; Curriculum, <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">{user?.name || selectedLearnerEmail?.split('@')[0] || 'Learner'}</span>
             </h1>
@@ -233,7 +229,7 @@ export default function LearnerDashboard() {
           <h2 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
             <span className="text-purple-400">#</span> Enrolled Programs
           </h2>
-          <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-3 py-1 font-mono text-xs text-purple-300">
+          <span className="rounded-full bg-purple-500/10 border border-purple-500/20 px-3 py-1 font-mono text-xs dark:text-purple-300">
             {enrollments.length} Enrolled
           </span>
         </div>

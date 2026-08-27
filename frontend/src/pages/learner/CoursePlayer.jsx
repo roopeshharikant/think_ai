@@ -23,11 +23,11 @@ function ModuleLessons({ moduleId, currentLessonId, onSelectLesson }) {
   }, [dispatch, moduleId]);
 
   if (lessons.length === 0) {
-    return <p className="p-3 pl-8 text-xs text-gray-400">No lessons yet.</p>;
+    return <p className="p-3 pl-8 text-xs text-slate-400">No lessons yet.</p>;
   }
 
   return (
-    <div className="bg-white dark:bg-transparent">
+    <div className="bg-transparent space-y-1 py-1">
       {lessons.map((lesson) => (
         <LessonRow
           key={lesson.id}
@@ -42,19 +42,24 @@ function ModuleLessons({ moduleId, currentLessonId, onSelectLesson }) {
 
 function LessonRow({ lesson, isActive, onSelect }) {
   const isComplete = useSelector(selectIsLessonComplete(lesson.id));
+
   return (
     <button
       onClick={onSelect}
-      className={`w-full flex items-center justify-between p-3 pl-8 text-sm transition-all border-l-2 ${isActive
-        ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 font-medium'
-        : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-200'
+      className={`w-full flex items-center justify-between p-2.5 px-4 rounded-xl text-xs transition-all cursor-pointer ${isActive
+        ? 'bg-indigo-600 text-white font-medium shadow-sm'
+        : 'hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-400'
         }`}
     >
-      <span className="flex items-center gap-2 truncate pr-4">
-        {isComplete && <span className="text-emerald-500 text-xs">✓</span>}
-        {lesson.title}
+      <span className="flex items-center space-x-2 truncate pr-2">
+        {isComplete ? (
+          <i className="fa-solid fa-circle-check text-emerald-500"></i>
+        ) : (
+          <i className="fa-regular fa-circle text-slate-400 text-[10px]"></i>
+        )}
+        <span className="truncate">{lesson.title}</span>
       </span>
-      <span className="text-xs shrink-0 opacity-60">{lesson.duration || ''}</span>
+      <span className="shrink-0 opacity-70 text-[10px]">{lesson.duration || ''}</span>
     </button>
   );
 }
@@ -73,6 +78,8 @@ export default function CoursePlayer() {
   const [activeModule, setActiveModule] = useState(null);
   const [currentLesson, setCurrentLesson] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  const [activeTab, setActiveTab] = useState('notes');
+  const [noteText, setNoteText] = useState('');
 
   useEffect(() => {
     if (enrollments.length === 0 && user?.email) {
@@ -168,103 +175,239 @@ export default function CoursePlayer() {
     }
   };
 
+  const handleMarkComplete = () => {
+    if (currentLesson && enrollmentId) {
+      dispatch(markLessonComplete({ lessonId: currentLesson.id, enrollmentId }));
+      showFeedback('Marked Complete ✓');
+    }
+  };
+
   if (!user?.email) {
-    return <div className="p-6 text-sm text-neutral-400">Loading your account…</div>;
+    return <div className="p-6 text-sm text-slate-400">Loading your account…</div>;
   }
   if (enrollments.length > 0 && !enrollment) {
-    return <div className="p-6 text-sm text-red-600">You're not enrolled in this course.</div>;
+    return <div className="p-6 text-sm text-rose-500">You're not enrolled in this course.</div>;
   }
   if (!enrollment || modulesLoading) {
-    return <div className="p-6 text-sm text-neutral-400">Loading course…</div>;
+    return <div className="p-6 text-sm text-slate-400">Loading course…</div>;
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-8rem)] overflow-y-auto lg:overflow-visible">
-      <div className="flex-1 flex flex-col gap-4 min-w-0 order-2 lg:order-1">
-        {/* LEFT: video player */}
-        <div
-          ref={videoContainerRef}
-          className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-800 flex items-center justify-center"
-        >
-          {currentLesson ? (
-            <video
-              ref={videoRef}
-              src={currentLesson.videoUrl}
-              className="w-full h-full object-cover"
-              controls
-              controlsList="nodownload"
-              onContextMenu={(e) => e.preventDefault()}
-              autoPlay
-              onEnded={handleVideoEnded}
-            />
-          ) : (
-            <p className="text-gray-400 text-sm">Select a lesson to begin</p>
-          )}
+    <div className="min-h-screen bg-slate-50 dark:bg-[#131314] text-slate-900 dark:text-[#e3e3e3] font-sans transition-colors duration-300">
+      <main className="max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {feedback && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-              <div className="bg-black/70 backdrop-blur-md text-white px-6 py-3 rounded-2xl text-lg font-semibold shadow-2xl border border-white/10">
-                {feedback}
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Left 2 Columns: Course Player & Interactive Tabs */}
+        <div className="lg:col-span-2 flex flex-col space-y-6">
 
-        <div className="bg-white dark:bg-[#151025]/50 backdrop-blur-md rounded-2xl p-6 border border-gray-200 dark:border-purple-500/20 shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-purple-100 mb-2">
-            {currentLesson?.title || 'No lesson selected'}
-          </h1>
-          <p className="text-gray-600 dark:text-purple-300/70 text-sm">
-            {course?.title}
-            {summary && ` • ${summary.completionPercentage}% complete`}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-            <span><kbd className="px-2 py-1 bg-gray-100 dark:bg-white/10 rounded mr-1">Space</kbd> Play/Pause</span>
-            <span><kbd className="px-2 py-1 bg-gray-100 dark:bg-white/10 rounded mr-1">← / →</kbd> ±5s Seek</span>
-            <span><kbd className="px-2 py-1 bg-gray-100 dark:bg-white/10 rounded mr-1">↑ / ↓</kbd> Vol ±5%</span>
-            <span><kbd className="px-2 py-1 bg-gray-100 dark:bg-white/10 rounded mr-1">F</kbd> Fullscreen</span>
-          </div>
-        </div>
-      </div>
-
-      {/* RIGHT: modules + lessons */}
-        <div className="w-full lg:w-96 flex flex-col bg-white dark:bg-[#151025]/80 backdrop-blur-md rounded-2xl border border-gray-200 dark:border-purple-500/20 shadow-sm overflow-hidden order-1 lg:order-2">   
-        <div className="p-5 border-b border-gray-200 dark:border-purple-500/20 shrink-0">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-purple-100">Course Content</h2>
-          {summary && (
-            <p className="text-sm text-gray-500 dark:text-purple-300/60 mt-1">
-              {summary.completedLessons} of {summary.totalLessons} lessons completed
-            </p>
-          )}
-        </div>
-
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
-          {modules.length === 0 && (
-            <p className="p-3 text-sm text-gray-400">No modules yet for this course.</p>
-          )}
-          {modules.map((module) => (
-            <div key={module.id} className="border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setActiveModule(activeModule === module.id ? null : module.id)}
-                className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-black/20 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors text-left"
-              >
-                <span className="font-semibold text-gray-800 dark:text-gray-200 text-sm">{module.title}</span>
-                <span className="text-gray-400 dark:text-gray-500 text-xl leading-none">
-                  {activeModule === module.id ? '−' : '+'}
-                </span>
-              </button>
-
-              {activeModule === module.id && (
-                <ModuleLessons
-                  moduleId={module.id}
-                  currentLessonId={currentLesson?.id}
-                  onSelectLesson={setCurrentLesson}
+          {/* Course Player Box with Glassy Border */}
+          <div className="bg-white dark:bg-[#1f1f23]/80 dark:backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-xl">
+            <div
+              ref={videoContainerRef}
+              className="relative bg-black aspect-video flex items-center justify-center group"
+            >
+              {currentLesson ? (
+                <video
+                  ref={videoRef}
+                  src={currentLesson.videoUrl}
+                  className="w-full h-full object-cover"
+                  controls
+                  controlsList="nodownload"
+                  onContextMenu={(e) => e.preventDefault()}
+                  autoPlay
+                  onEnded={handleVideoEnded}
                 />
+              ) : (
+                <div className="text-center p-6">
+                  <img
+                    src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200"
+                    alt="Lesson Thumbnail"
+                    className="absolute inset-0 w-full h-full object-cover opacity-40"
+                  />
+                  <div className="absolute inset-0 bg-slate-950/60"></div>
+                  <p className="relative z-10 text-slate-200 text-sm font-medium">Select a lesson from the curriculum to begin</p>
+                </div>
+              )}
+
+              {feedback && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+                  <div className="bg-black/80 backdrop-blur-md text-white px-6 py-3 rounded-2xl text-lg font-semibold shadow-2xl border border-white/10">
+                    {feedback}
+                  </div>
+                </div>
               )}
             </div>
-          ))}
+
+            {/* Lesson Metadata */}
+            <div className="p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 dark:border-white/10">
+              <div>
+                <span className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-semibold">
+                  {course?.title || 'Course Details'}
+                </span>
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white mt-0.5">
+                  {currentLesson?.title || 'No lesson selected'}
+                </h1>
+              </div>
+              <button
+                onClick={handleMarkComplete}
+                className="bg-indigo-50 dark:bg-purple-600/20 hover:bg-indigo-100 dark:hover:bg-purple-600/30 text-indigo-600 dark:text-purple-300 border border-indigo-200 dark:border-purple-500/30 px-4 py-2 rounded-xl text-sm font-medium transition flex items-center space-x-2 cursor-pointer"
+              >
+                <i className="fa-solid fa-check"></i>
+                <span>Mark as Complete</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive Tabs: Notes / Resources / Discussion with Glassy Border */}
+          <div className="bg-white dark:bg-[#1f1f23]/80 dark:backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm">
+            <div className="flex space-x-6 border-b border-slate-200 dark:border-white/10 pb-3 text-sm font-semibold">
+              <button
+                onClick={() => setActiveTab('notes')}
+                className={`${activeTab === 'notes' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-3 -mb-3' : 'text-slate-500 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-white'} transition cursor-pointer`}
+              >
+                Lesson Notes
+              </button>
+              <button
+                onClick={() => setActiveTab('resources')}
+                className={`${activeTab === 'resources' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-3 -mb-3' : 'text-slate-500 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-white'} transition cursor-pointer`}
+              >
+                Resources (3)
+              </button>
+              <button
+                onClick={() => setActiveTab('discussion')}
+                className={`${activeTab === 'discussion' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-3 -mb-3' : 'text-slate-500 dark:text-[#c4c7c5] hover:text-slate-800 dark:hover:text-white'} transition cursor-pointer`}
+              >
+                Discussion (12)
+              </button>
+            </div>
+
+            {activeTab === 'notes' && (
+              <div className="mt-4 space-y-3">
+                <textarea
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value)}
+                  placeholder="Take private notes for this lesson... (saved locally)"
+                  className="w-full bg-slate-50 dark:bg-[#131314] border border-slate-200 dark:border-white/10 rounded-xl p-3 text-sm text-slate-800 dark:text-[#e3e3e3] focus:outline-none focus:border-indigo-500 resize-none h-24"
+                />
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => alert('Note saved successfully!')}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg transition shadow cursor-pointer"
+                  >
+                    Save Note
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'resources' && (
+              <div className="mt-4 text-sm text-slate-600 dark:text-[#c4c7c5] space-y-2">
+                <div className="p-3 bg-slate-50 dark:bg-[#131314] rounded-xl border border-slate-200 dark:border-white/10 flex justify-between items-center">
+                  <span><i className="fa-solid fa-file-pdf text-rose-500 mr-2"></i> Lecture_Slides_Module3.pdf</span>
+                  <button className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline text-xs cursor-pointer">Download</button>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-[#131314] rounded-xl border border-slate-200 dark:border-white/10 flex justify-between items-center">
+                  <span><i className="fa-solid fa-code text-cyan-500 mr-2"></i> starter-code-repo.zip</span>
+                  <button className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline text-xs cursor-pointer">Download</button>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'discussion' && (
+              <div className="mt-4 text-sm text-slate-600 dark:text-[#c4c7c5]">
+                <p className="text-xs italic">Discussion stream loaded. Join the community thread below.</p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+
+        {/* Right Column: Progress Tracker & Course Content */}
+        <div className="space-y-6">
+
+          {/* Progress Tracker Widget with Glassy Border */}
+          <div className="bg-gradient-to-br from-white to-indigo-50/50 dark:from-[#1f1f23]/90 dark:to-[#131314]/90 dark:backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-bold text-slate-900 dark:text-white text-sm">Overall Progress</h3>
+              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                {summary ? `${summary.completionPercentage}% Completed` : '0% Completed'}
+              </span>
+            </div>
+            <div className="w-full bg-slate-200 dark:bg-white/10 h-2 rounded-full overflow-hidden mb-4">
+              <div
+                className="bg-gradient-to-r from-indigo-500 to-cyan-400 h-full rounded-full transition-all duration-500"
+                style={{ width: `${summary?.completionPercentage || 0}%` }}
+              ></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="bg-slate-50 dark:bg-[#131314]/60 p-3 rounded-xl border border-slate-200 dark:border-white/10">
+                <span className="text-2xl font-black text-slate-900 dark:text-white">
+                  {summary ? `${summary.completedLessons}/${summary.totalLessons}` : '0/0'}
+                </span>
+                <p className="text-xs text-slate-500 dark:text-[#c4c7c5] mt-0.5">Lessons Done</p>
+              </div>
+              <div className="bg-slate-50 dark:bg-[#131314]/60 p-3 rounded-xl border border-slate-200 dark:border-white/10">
+                <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400">Active</span>
+                <p className="text-xs text-slate-500 dark:text-[#c4c7c5] mt-0.5">Status</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Upcoming Live Sessions with Glassy Border */}
+          <div className="bg-white dark:bg-[#1f1f23]/80 dark:backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-3 flex items-center justify-between">
+              <span>Upcoming Sessions</span>
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
+            </h3>
+            <div className="space-y-3">
+              <div className="bg-slate-50 dark:bg-[#131314] p-3.5 rounded-xl border border-slate-200 dark:border-white/10 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded font-semibold uppercase tracking-wider">Live Q&A</span>
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white mt-1">React Router v6 Deep Dive</h4>
+                  <p className="text-xs text-slate-500 dark:text-[#c4c7c5] mt-0.5"><i className="fa-regular fa-clock mr-1"></i> Today, 5:00 PM</p>
+                </div>
+                <button className="bg-slate-200 dark:bg-white/10 hover:bg-indigo-600 hover:text-white text-slate-800 dark:text-white text-xs px-3 py-2 rounded-lg transition font-medium cursor-pointer">Join</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Course Curriculum with Glassy Border */}
+          <div className="bg-white dark:bg-[#1f1f23]/80 dark:backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm">
+            <h3 className="font-bold text-slate-900 dark:text-white text-sm mb-3">Course Curriculum</h3>
+
+            <div className="space-y-2 text-sm">
+              {modules.length === 0 && (
+                <p className="text-xs text-slate-400 p-2">No modules yet for this course.</p>
+              )}
+
+              {modules.map((module) => {
+                const isExpanded = activeModule === module.id;
+                return (
+                  <div key={module.id} className="border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => setActiveModule(isExpanded ? null : module.id)}
+                      className="w-full p-3 bg-slate-50 dark:bg-[#131314] flex items-center justify-center sm:justify-between cursor-pointer font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition"
+                    >
+                      <span className="text-xs font-semibold truncate pr-2">{module.title}</span>
+                      <i className={`fa-solid fa-chevron-${isExpanded ? 'up' : 'down'} text-xs text-slate-400`}></i>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-2 pb-2 bg-slate-50/50 dark:bg-[#131314]/40">
+                        <ModuleLessons
+                          moduleId={module.id}
+                          currentLessonId={currentLesson?.id}
+                          onSelectLesson={setCurrentLesson}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+
+      </main>
     </div>
   );
 }

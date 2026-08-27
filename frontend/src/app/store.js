@@ -1,16 +1,17 @@
-import { configureStore } from '@reduxjs/toolkit'
-import authReducer from '../features/auth/authSlice'
-import courseReducer from '../features/courses/courseSlice'
-import batchReducer from '../features/batches/batchSlice'
-import adminUserReducer from '../features/adminUsers/adminUserSlice'
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '../features/auth/authSlice';
+import courseReducer from '../features/courses/courseSlice';
+import batchReducer from '../features/batches/batchSlice';
+import adminUserReducer from '../features/adminUsers/adminUserSlice';
 import moduleReducer from '../features/modules/moduleSlice';
 import lessonReducer from '../features/lessons/lessonSlice';
 import lessonProgressReducer from '../features/lessonProgress/lessonProgressSlice';
 import certificateReducer from '../features/certificates/certificateSlice';
 import enrollmentReducer from '../features/enrollments/enrollmentSlice';
 import rbacReducer from '../features/rbac/rbacSlice';
-import notificationReducer from '../features/notifications/notificationSlice';
-
+import assessmentReducer from '../features/assessments/assessmentSlice';
+import searchReducer from '../features/search/searchSlice';
+import notificationReducer from '../features/preferenceNotification/preferenceNotificationSlice'; 
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,8 @@ export const store = configureStore({
     lessonProgress: lessonProgressReducer,
     certificates: certificateReducer,
     rbac: rbacReducer,
-    notifications: notificationReducer,
+    assessments: assessmentReducer,
+    search: searchReducer,
+    notifications: notificationReducer, 
   },
-})
+});

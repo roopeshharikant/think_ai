@@ -11,6 +11,7 @@ const {
     unlockCourseAccess,
     deleteEnrollment
 } = require("../controllers/enrollmentController");
+const { createSession, getSessionById, updateSession, deleteSession } = require("../controllers/sessionController");
 
 
 const {
@@ -248,6 +249,11 @@ router.put(
  *       500:
  *         description: Failed to delete enrollment
  */
+router.delete("/:id", deleteEnrollment);
+router.post("/sessions", createSession);
+router.get("/sessions/:id", getSessionById);
+router.put("/sessions/:id", updateSession);
+router.delete("/sessions/:id", deleteSession);
 router.delete(
     "/:id",
     validateEnrollmentId,

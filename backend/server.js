@@ -5,26 +5,30 @@ const { Server } = require("socket.io");
 
 const app = require("./app");
 
-const { startWorker } = require("./services/notificationQueueService");
-const initSockets = require("./sockets/index");
-
-require("./config/db");
+const PORT = process.env.PORT || 3000;
 
 const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
-    cors: {
-        origin: "*"
-    }
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+  }
 });
 
-initSockets(io);
+app.set("io", io);
 
-const PORT = process.env.PORT || 5000;
-
-httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log("[socket] Socket.IO attached and listening");
+httpServer.listen(PORT, "127.0.0.1", () => {
+  console.log(`Thinkz AI backend running on port ${PORT}`);
+});
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        service: 'think-ai-backend'
+    });
+});
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
 
-startWorker();
+module.exports = httpServer;

@@ -309,7 +309,7 @@ export default function AssessmentSubmission({
       </div>
 
       {showSubmitModal && (
-        <SubmitModalgit 
+        <SubmitModal
           answeredCount={answeredCount}
           total={questions.length}
           flaggedCount={Object.values(flagged).filter(Boolean).length}

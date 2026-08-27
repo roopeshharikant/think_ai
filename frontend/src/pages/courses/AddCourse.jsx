@@ -6,6 +6,8 @@ import Button from '../../components/common/Button';
 const EMPTY_COURSE = {
   title: '',
   description: '',
+  instructorName: '',
+  instructorDetails: '',
   duration: '',
   category: '',
   level: 'Beginner',
@@ -18,9 +20,6 @@ const EMPTY_COURSE = {
   status: 'ACTIVE',
 };
 
-// Keep this in sync with CourseCard.jsx's TECH_IMAGES list.
-// Ideally, move this into a shared file (e.g. src/constants/techImages.js)
-// and import it in both CourseCard.jsx and this file to avoid duplication.
 const TECH_IMAGE_OPTIONS = [
   { label: 'JavaScript', img: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
   { label: 'TypeScript', img: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
@@ -62,13 +61,11 @@ export default function AddCourse({ isOpen, onClose, course, onSave }) {
     });
   };
 
-  // Select a predefined tech image from the gallery
   const handleSelectTechImage = (option) => {
     setFormData((prev) => ({ ...prev, thumbnail: option.img, thumbnailFile: null }));
     setThumbnailPreview(option.img);
   };
 
-  // Handle custom image thumbnail uploads (supports png, jpg, webp, svg, etc.)
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -86,7 +83,6 @@ export default function AddCourse({ isOpen, onClose, course, onSave }) {
     setThumbnailPreview(null);
   };
 
-  // Handle course video file uploads (supports mp4, mkv, webm, mov, etc.)
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -134,7 +130,28 @@ export default function AddCourse({ isOpen, onClose, course, onSave }) {
           />
         </div>
 
-        {/* Thumbnail / Card Image Section */}
+        {/* Instructor Field Added to Match Backend Model */}
+        <InputField
+          label="Instructor Name"
+          id="instructorName"
+          name="instructorName"
+          type="text"
+          value={formData.instructorName}
+          onChange={handleChange}
+          placeholder="e.g. Alex Rivera"
+        />
+
+        <InputField
+          label="Instructor Details"
+          id="instructorDetails"
+          name="instructorDetails"
+          type="text"
+          value={formData.instructorDetails}
+          onChange={handleChange}
+          placeholder="e.g. Senior React Developer, 5 years experience"
+        />
+
+        {/* Thumbnail / Card Image Section (Kept as is per instructions) */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-sm font-medium text-gray-300">
@@ -151,7 +168,6 @@ export default function AddCourse({ isOpen, onClose, course, onSave }) {
             )}
           </div>
 
-          {/* Current selection preview */}
           <div className="flex items-center gap-3 mb-3">
             {thumbnailPreview ? (
               <div className="w-16 h-16 rounded-lg overflow-hidden border border-cyan-500/40 shrink-0 bg-white flex items-center justify-center">
@@ -165,7 +181,6 @@ export default function AddCourse({ isOpen, onClose, course, onSave }) {
             <p className="text-xs text-gray-500">Pick an icon below, or upload a custom image.</p>
           </div>
 
-          {/* Tech image gallery */}
           <div className="grid grid-cols-6 sm:grid-cols-7 gap-2 p-3 bg-[#0D1220] border border-gray-700 rounded-lg max-h-40 overflow-y-auto">
             {TECH_IMAGE_OPTIONS.map((option) => {
               const isSelected = formData.thumbnail === option.img;
@@ -175,11 +190,10 @@ export default function AddCourse({ isOpen, onClose, course, onSave }) {
                   type="button"
                   onClick={() => handleSelectTechImage(option)}
                   title={option.label}
-                  className={`aspect-square rounded-lg flex items-center justify-center p-2 bg-white border-2 transition-all cursor-pointer ${
-                    isSelected
+                  className={`aspect-square rounded-lg flex items-center justify-center p-2 bg-white border-2 transition-all cursor-pointer ${isSelected
                       ? 'border-cyan-400 ring-2 ring-cyan-400/40'
                       : 'border-transparent hover:border-cyan-500/40'
-                  }`}
+                    }`}
                 >
                   <img src={option.img} alt={option.label} className="w-full h-full object-contain" />
                 </button>
@@ -187,7 +201,6 @@ export default function AddCourse({ isOpen, onClose, course, onSave }) {
             })}
           </div>
 
-          {/* Custom upload fallback */}
           <div className="mt-3">
             <input
               type="file"

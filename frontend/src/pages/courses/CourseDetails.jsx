@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
-import { notificationReceived } from '../../features/notifications/notificationSlice';
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getCourseById } from "../../api/courseApi";
 import { DetailsSkeleton } from "../../components/common/LoadingSkeleton";
@@ -58,18 +57,11 @@ export default function CourseDetails() {
     }
   };
 
-
-
   const handleAddToCart = () => {
-    dispatch(notificationReceived({
-      id: `cart_${Date.now()}`,
-      title: 'Added to cart',
-      message: `${course.title} was added to your cart.`,
-      type: 'cart',
-      read: false,
-      createdAt: new Date().toISOString(),
-    }));
-    toast.success(`${course.title} added to cart`, { theme: "dark" });
+    if (!course) return;
+    navigate('/learner/settings/notifications', { 
+      state: { pendingCartCourse: course } 
+    });
   };
 
   const handleBuyNow = () => {
@@ -82,7 +74,6 @@ export default function CourseDetails() {
     navigate(`/learner/courses/${courseId}/videos`);
   };
 
-  // Restored loading & null checks to prevent crashes
   if (loading) {
     return <DetailsSkeleton />;
   }
@@ -105,89 +96,108 @@ export default function CourseDetails() {
       {/* Header Bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold dark:text-purple-400">Course: {course.title}</h1>
-          <p className="text-sm text-gray-400 mt-1">Comprehensive curriculum and program details</p>
+          <h1 className="text-2xl font-semibold text-white">Course: {course.title}</h1>
+          <p className="text-sm text-slate-400 mt-1">Comprehensive curriculum and program details</p>
         </div>
       </div>
 
-      {/* Main Content Card */}
-      <div className="relative bg-[#112435] border border-gray-800 rounded-2xl shadow-lg overflow-hidden min-h-[420px]">
+      {/* Main Content Card with Glow Wrapper & Charcoal Background */}
+      <div className="relative rounded-3xl p-0.5 bg-gradient-to-b from-purple-500/40 via-cyan-500/10 to-transparent shadow-[0_0_20px_rgba(147,51,235,0.06)]">
+        <div className="bg-[#161a23] border border-slate-800/80 rounded-[22px] shadow-2xl overflow-hidden">
 
-        {imageSrc && (
-          <img
-            src={imageSrc}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-            onError={(e) => { e.target.style.display = 'none'; }}
-          />
-        )}
+          {/* Thumbnail Header Area matching Card style */}
+          <div className="relative h-56 w-full bg-[#10131a] border-b border-slate-800 flex items-center justify-center p-6">
+            {imageSrc ? (
+              <img
+                src={imageSrc}
+                alt={course.title}
+                className="max-h-full max-w-full object-contain drop-shadow-lg select-none"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            ) : (
+              <span className="font-mono text-2xl font-bold text-slate-400">&lt;/&gt;</span>
+            )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-[#112435] via-[#112435]/40 to-transparent" />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl" />
+            {/* Status Badge */}
+            <span className={`absolute top-4 right-4 shrink-0 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md ${(!course.status || course.status === "ACTIVE")
+              ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+              : "bg-rose-500/20 text-rose-300 border-rose-500/30"
+            }`}>
+              {course.status || "ACTIVE"}
+            </span>
+          </div>
 
-        <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-start p-8 pt-40">
-
-          <div className="flex-1 w-full space-y-6">
+          <div className="p-8 space-y-6 text-slate-100">
+            
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm text-gray-300 mb-1 drop-shadow">Course Title</p>
-                <p className="text-lg font-medium text-white drop-shadow">{course.title}</p>
+                <p className="text-xs text-purple-400 font-bold uppercase tracking-wider mb-1">{course.category || "General"}</p>
+                <p className="text-xl font-bold text-white">{course.title}</p>
               </div>
-              <span className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium tracking-wide border whitespace-nowrap backdrop-blur-sm ${(!course.status || course.status === "ACTIVE")
-                  ? "bg-green-500/20 text-green-300 border-green-500/30"
-                  : "bg-rose-500/20 text-rose-300 border-rose-500/30"
-                }`}>
-                Status: {course.status || "ACTIVE"}
-              </span>
             </div>
 
             <div>
-              <p className="text-sm text-gray-300 mb-1">Description</p>
-              <p className="text-sm text-gray-200 leading-relaxed">{course.description || "No description provided."}</p>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Description</p>
+              <p className="text-sm text-slate-300 leading-relaxed">{course.description || "No description provided."}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700/60">
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800">
               <div>
-                <p className="text-sm text-gray-300 mb-1">Category & Level</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Level & Language</p>
                 <p className="text-white text-sm font-medium">
-                  {course.category || "General"} • {course.level || "All Levels"}
+                  {course.level || "All Levels"} • {course.language || "English"}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-300 mb-1">Duration</p>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Duration</p>
                 <p className="text-white text-sm font-medium">
-                  {course.duration || "Self-paced"} Days
+                  {course.duration || "Self-paced"}
                 </p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-2">
               <div>
-                <p className="text-sm text-gray-300 mb-1">Price</p>
-                <p className="text-lg font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-fuchsia-300">
-                  {typeof course.price === 'number' ? `₹${course.price}` : (course.price || 'Free')}
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Instructor</p>
+                <p className="text-white text-sm font-medium">
+                  {course.instructor || "Not specified"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Created At</p>
+                <p className="text-white text-sm font-medium">
+                  {course.createdAt ? new Date(course.createdAt).toLocaleDateString() : "Recent"}
+                </p>
+              </div>
+            </div>
+
+            {/* Price Footer Bar */}
+            <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Price</p>
+                <p className="text-2xl font-black font-mono text-white">
+                  {typeof course.price === 'number' ? `₹${course.price.toLocaleString('en-IN')}` : (course.price || 'Free')}
                 </p>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-700/60">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-800">
               <button
                 onClick={handleAddToCart}
-                className="flex-1 px-5 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-gray-900 rounded-lg font-semibold text-sm transition-colors cursor-pointer"
+                className="flex-1 px-5 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl font-bold text-sm transition-all cursor-pointer shadow-lg shadow-amber-400/10"
               >
                 Add to Cart
               </button>
               <button
                 onClick={handleBuyNow}
-                className="flex-1 px-5 py-2.5 bg-orange-500 hover:bg-orange-400 text-white rounded-lg font-semibold text-sm transition-colors cursor-pointer"
+                className="flex-1 px-5 py-3 bg-orange-500 hover:bg-orange-400 text-white rounded-xl font-bold text-sm transition-all cursor-pointer shadow-lg shadow-orange-500/10"
               >
                 Buy Now
               </button>
               <button
                 onClick={handleViewVideos}
-                className="flex-1 px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg font-semibold text-sm transition-colors cursor-pointer"
+                className="flex-1 px-5 py-3 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-xl font-bold text-sm transition-all cursor-pointer"
               >
                 Course Videos
               </button>

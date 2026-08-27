@@ -14,9 +14,8 @@ function AddLesson() {
     moduleId: "",
     videoUrl: "",
     content: "",
-    durationMinutes: "",
+    duration: "",
     order: "",
-    status: "ACTIVE",
   });
 
   useEffect(() => {
@@ -38,8 +37,8 @@ function AddLesson() {
     setLesson({
       ...lesson,
       [name]:
-        name === "moduleId" || name === "durationMinutes" || name === "order"
-          ? Number(value)
+        name === "moduleId" || name === "duration" || name === "order"
+          ? value === "" ? "" : Number(value)
           : value,
     });
   };
@@ -48,9 +47,11 @@ function AddLesson() {
     e.preventDefault();
     try {
       const payload = {
-        ...lesson,
+        title: lesson.title,
         moduleId: Number(lesson.moduleId),
-        durationMinutes: Number(lesson.durationMinutes),
+        videoUrl: lesson.videoUrl,
+        content: lesson.content,
+        duration: lesson.duration === "" ? 0 : Number(lesson.duration),
         order: lesson.order === "" ? 0 : Number(lesson.order),
       };
 
@@ -64,7 +65,7 @@ function AddLesson() {
   };
 
   return (
-    <div className="relative flex flex-col h-full space-y-4 sm:space-y-6 -mt-2 overflow-hidden pb-2">
+    <div className="relative flex flex-col space-y-4 sm:space-y-6 -mt-2 pb-6">
       {/* Header */}
       <div className="flex items-center justify-between shrink-0 max-w-3xl mx-auto w-full">
         <div>
@@ -74,7 +75,7 @@ function AddLesson() {
       </div>
 
       {/* Form Card */}
-      <div className="flex-1 overflow-auto glass-panel rounded-2xl p-6 sm:p-8 bg-[#1A1F2B] border border-gray-800 custom-scrollbar max-w-3xl mx-auto w-full">
+      <div className="glass-panel rounded-2xl p-6 sm:p-8 bg-[#1A1F2B] border border-gray-800 max-w-3xl mx-auto w-full">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="flex flex-col space-y-1 sm:col-span-2">
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Lesson Title</label>
@@ -110,8 +111,8 @@ function AddLesson() {
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Duration (minutes)</label>
             <InputField
               type="number"
-              name="durationMinutes"
-              value={lesson.durationMinutes}
+              name="duration"
+              value={lesson.duration}
               onChange={handleChange}
               placeholder="Enter duration"
               required
@@ -150,19 +151,6 @@ function AddLesson() {
               placeholder="Lesson notes / description"
               className="bg-[#0B0F19] border border-gray-700/80 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-cyan-500 transition-all resize-none"
             />
-          </div>
-
-          <div className="col-span-1 sm:col-span-2 flex flex-col space-y-1">
-            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</label>
-            <select
-              name="status"
-              value={lesson.status}
-              onChange={handleChange}
-              className="bg-[#0B0F19] border border-gray-700/80 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-cyan-500 transition-all"
-            >
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="INACTIVE">INACTIVE</option>
-            </select>
           </div>
 
           <div className="col-span-1 sm:col-span-2 pt-4">

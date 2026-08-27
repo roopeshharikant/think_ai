@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAssignments } from '../../../api/assessmentApi';
+// import { fetchAssignments } from '../../../api/assessmentApi'; // TODO: doesn't exist yet — backend needs GET /api/assessments/mine or similar
 
 const STATUS_STYLES = {
   pending: 'bg-[var(--accent-to)]/15 text-[var(--accent-to)]',
@@ -22,13 +22,17 @@ export default function AssignmentsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchAssignments()
+
+    // TEMPORARY STUB — replace once backend exposes a list endpoint.
+    // Expected shape per item: { id, title, courseTitle, status, dueDate, score }
+    Promise.resolve([])
       .then((data) => {
         if (!cancelled) setAssignments(data);
       })
       .catch((e) => {
         if (!cancelled) setError(e.message);
       });
+
     return () => {
       cancelled = true;
     };
