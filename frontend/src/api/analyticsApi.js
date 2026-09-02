@@ -1,10 +1,13 @@
 import api from "./axios";
 
-export const getEnrollmentTrends = () =>
-  api.get("/analytics/enrollments");
+export const getEnrollmentTrends = (params = {}) =>
+  api.get("/analytics/enrollment-trends", { params });
 
-export const getCourseCompletionRates = () =>
-  api.get("/analytics/course-completion");
+export const getCourseEnrollments = (params = {}) =>
+  api.get("/analytics/course-enrollments", { params });
 
-export const getHeatmap = () =>
-  api.get("/analytics/heatmap");
+export const getCourseCompletionRates = (params = {}) =>
+  api.get("/analytics/course-completion-rates", { params });
+
+export const getAssessmentAnalytics = (params = {}) =>
+  api.get("/analytics/assessment", { params });

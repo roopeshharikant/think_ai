@@ -1,13 +1,11 @@
 import api from './axios';
 
-export const createAuditLog = (entry) =>
-  api.post('/audit-logs', {
-    action: entry.action,          // e.g. "PERMISSION_TOGGLE"
-    targetRole: entry.targetRole,
-    targetPermission: entry.targetPermission,
-    granted: entry.granted,
-    performedBy: entry.performedBy, // logged-in admin's id/email
-    timestamp: new Date().toISOString(),
-  });
+export const getAuditLogs = (filters = {}) => {
+  const params = new URLSearchParams(filters);
+  return api.get(`/audit-logs?${params.toString()}`);
+};
 
-export const getAuditLogs = () => api.get('/audit-logs');
+export const exportAuditLogsUrl = (filters = {}, format = 'csv') => {
+  const params = new URLSearchParams({ ...filters, format });
+  return `${api.defaults.baseURL}/audit-logs/export?${params.toString()}`;
+};

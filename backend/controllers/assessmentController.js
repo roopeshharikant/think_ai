@@ -1,13 +1,10 @@
-const service =
-    require("../services/assessmentService");
-
+const service = require("../services/assessmentService");
 
 // ============================================================
 // VALIDATION HELPERS
 // ============================================================
 
 const isValidationError = (message = "") => {
-
     return (
         message.includes("must be a positive integer") ||
         message.includes("must be an array") ||
@@ -18,39 +15,28 @@ const isValidationError = (message = "") => {
     );
 };
 
-
 const sendControllerError = (
     res,
     error,
     notFoundMessages = []
 ) => {
-
     const message =
         error?.message ||
         "Internal server error";
 
-
-    if (
-        isValidationError(message)
-    ) {
-
+    if (isValidationError(message)) {
         return res.status(400).json({
             success: false,
             message
         });
     }
 
-
-    if (
-        notFoundMessages.includes(message)
-    ) {
-
+    if (notFoundMessages.includes(message)) {
         return res.status(404).json({
             success: false,
             message
         });
     }
-
 
     return res.status(500).json({
         success: false,
@@ -63,13 +49,8 @@ const sendControllerError = (
 // CREATE ASSESSMENT
 // ============================================================
 
-const createAssessment = async (
-    req,
-    res
-) => {
-
+const createAssessment = async (req, res) => {
     try {
-
         const assessment =
             await service.createAssessment(
                 req.body
@@ -78,15 +59,11 @@ const createAssessment = async (
         return res.status(201).json({
 
             success: true,
-
-            message:
-                "Assessment created successfully",
-
+            message: "Assessment created successfully",
             data: assessment
         });
 
     } catch (error) {
-
         console.error(
             "Create assessment error:",
             error
@@ -104,16 +81,152 @@ const createAssessment = async (
 
 
 // ============================================================
+// GET ENROLLMENT ASSESSMENT STATUS
+// ============================================================
+
+const getEnrollmentAssessmentStatus = async (req, res) => {
+    try {
+        const status =
+            await service.getEnrollmentAssessmentStatus(
+                req.params.enrollmentId
+            );
+
+        return res.status(200).json({
+            success: true,
+            data: status
+        });
+
+    } catch (error) {
+        console.error(
+            "Enrollment assessment status error:",
+            error
+        );
+
+        if (error.message === "Enrollment not found") {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+// ============================================================
+// GET ALL ASSESSMENTS
+// ============================================================
+
+const getAllAssessments = async (req, res) => {
+    try {
+        const { moduleId } = req.query;
+
+        const assessments =
+            await service.getAllAssessments(moduleId);
+
+        return res.status(200).json({
+            success: true,
+            data: assessments
+        });
+
+    } catch (error) {
+        console.error(
+            "Get all assessments error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+// ============================================================
+// UPDATE ASSESSMENT
+// ============================================================
+
+const updateAssessment = async (req, res) => {
+    try {
+        const assessment =
+            await service.updateAssessment(
+                req.params.id,
+                req.body
+            );
+
+        return res.status(200).json({
+            success: true,
+            data: assessment
+        });
+
+    } catch (error) {
+        console.error(
+            "Update assessment error:",
+            error
+        );
+
+        if (error.message === "Assessment not found") {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+// ============================================================
+// DELETE ASSESSMENT
+// ============================================================
+
+const deleteAssessment = async (req, res) => {
+    try {
+        await service.deleteAssessment(
+            req.params.id
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Assessment deleted successfully"
+        });
+
+    } catch (error) {
+        console.error(
+            "Delete assessment error:",
+            error
+        );
+
+        if (error.message === "Assessment not found") {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+// ============================================================
 // GET ASSESSMENT BY ID
 // ============================================================
 
-const getAssessmentById = async (
-    req,
-    res
-) => {
-
+const getAssessmentById = async (req, res) => {
     try {
-
         const assessment =
             await service.getAssessmentById(
                 req.params.id
@@ -124,9 +237,7 @@ const getAssessmentById = async (
             return res.status(404).json({
 
                 success: false,
-
-                message:
-                    "Assessment not found"
+                message: "Assessment not found"
             });
         }
 
@@ -138,7 +249,6 @@ const getAssessmentById = async (
         });
 
     } catch (error) {
-
         console.error(
             "Get assessment error:",
             error
@@ -154,81 +264,73 @@ const getAssessmentById = async (
     }
 };
 
+
 // ============================================================
 // START ASSESSMENT
 // ============================================================
 
-const startAssessment = async (
-    req,
-    res
-) => {
-
+const startAssessment = async (req, res) => {
     try {
-
         const submission =
             await service.startAssessment(
                 req.params.id,
                 req.body.enrollmentId
             );
 
-
         return res.status(200).json({
-
             success: true,
-
-            message:
-                "Assessment started successfully",
-
+            message: "Assessment started successfully",
             data: {
-
-                submissionId:
-                    submission.id,
-
-                assessmentId:
-                    submission.assessmentId,
-
-                enrollmentId:
-                    submission.enrollmentId,
-
-                status:
-                    submission.status,
-
-                totalMarks:
-                    submission.totalMarks,
-
-                score:
-                    submission.score,
-
-                percentage:
-                    submission.percentage
-
+                submissionId: submission.id,
+                assessmentId: submission.assessmentId,
+                enrollmentId: submission.enrollmentId,
+                status: submission.status,
+                totalMarks: submission.totalMarks,
+                score: submission.score,
+                percentage: submission.percentage
             }
-
         });
 
     } catch (error) {
-
         console.error(
             "Start assessment error:",
             error
         );
 
-
         const message =
             error?.message ||
             "Failed to start assessment";
 
+        if (isValidationError(message)) {
+            return res.status(400).json({
+                success: false,
+                message
+            });
+        }
 
         if (
-            isValidationError(message)
+            message === "Assessment not found" ||
+            message === "Enrollment not found"
+        ) {
+            return res.status(404).json({
+                success: false,
+                message
+            });
+        }
+
+        if (
+            message === "Assessment is not active" ||
+            message === "Enrollment is not active" ||
+            message === "Batch is not active" ||
+            message === "Course is not active" ||
+            message ===
+                "This assessment does not belong to the enrolled course"
         ) {
 
             return res.status(400).json({
 
                 success: false,
-
                 message
-
             });
         }
 
@@ -281,10 +383,7 @@ const startAssessment = async (
         return res.status(500).json({
 
             success: false,
-
-            message:
-                "Failed to start assessment"
-
+            message: "Failed to start assessment"
         });
     }
 };
@@ -294,13 +393,8 @@ const startAssessment = async (
 // SUBMIT ASSESSMENT
 // ============================================================
 
-const submitAssessment = async (
-    req,
-    res
-) => {
-
+const submitAssessment = async (req, res) => {
     try {
-
         const submission =
             await service.submitAssessment(
                 req.params.id,
@@ -310,27 +404,17 @@ const submitAssessment = async (
         return res.status(201).json({
 
             success: true,
-
-            message:
-                "Assessment submitted successfully",
-
+            message: "Assessment submitted successfully",
             data: submission
         });
 
     } catch (error) {
-
         console.error(
             "Submit assessment error:",
             error
         );
 
-
-        if (
-            isValidationError(
-                error.message
-            )
-        ) {
-
+        if (isValidationError(error.message)) {
             return res.status(400).json({
 
                 success: false,
@@ -340,13 +424,9 @@ const submitAssessment = async (
             });
         }
 
-
         if (
-            error.message ===
-                "Assessment not found" ||
-
-            error.message ===
-                "Enrollment not found"
+            error.message === "Assessment not found" ||
+            error.message === "Enrollment not found"
         ) {
 
             return res.status(404).json({
@@ -358,17 +438,10 @@ const submitAssessment = async (
             });
         }
 
-
         if (
-            error.message ===
-                "Enrollment is not active" ||
-
-            error.message ===
-                "Batch is not active" ||
-
-            error.message ===
-                "Course is not active" ||
-
+            error.message === "Enrollment is not active" ||
+            error.message === "Batch is not active" ||
+            error.message === "Course is not active" ||
             error.message ===
                 "This assessment does not belong to the enrolled course"
         ) {
@@ -382,12 +455,8 @@ const submitAssessment = async (
             });
         }
 
-
         if (
-            error.message.startsWith(
-                "Question "
-            ) ||
-
+            error.message.startsWith("Question ") ||
             error.message.startsWith(
                 "Invalid option for question"
             )
@@ -401,7 +470,6 @@ const submitAssessment = async (
                     error.message
             });
         }
-
 
         return res.status(500).json({
 
@@ -418,13 +486,8 @@ const submitAssessment = async (
 // GET ASSESSMENT ANALYTICS
 // ============================================================
 
-const getAssessmentAnalytics = async (
-    req,
-    res
-) => {
-
+const getAssessmentAnalytics = async (req, res) => {
     try {
-
         const analytics =
             await service.getAssessmentAnalytics(
                 req.params.id
@@ -438,7 +501,6 @@ const getAssessmentAnalytics = async (
         });
 
     } catch (error) {
-
         console.error(
             "Assessment analytics error:",
             error
@@ -459,27 +521,28 @@ const getAssessmentAnalytics = async (
 // GET ASSESSMENT SUBMISSION RESULT
 // ============================================================
 
-const getAssessmentSubmissionResult = async (
-    req,
-    res
-) => {
-
+const getAssessmentSubmissionResult = async (req, res) => {
     try {
+        const { submissionId } = req.params;
 
         const result =
             await service.getAssessmentSubmissionResult(
-                req.params.submissionId
+                submissionId
             );
 
+        if (!result) {
+            return res.status(404).json({
+                success: false,
+                message: "Assessment submission not found"
+            });
+        }
+
         return res.status(200).json({
-
             success: true,
-
             data: result
         });
 
     } catch (error) {
-
         console.error(
             "Get assessment submission result error:",
             error
@@ -495,6 +558,40 @@ const getAssessmentSubmissionResult = async (
     }
 };
 
+
+// ============================================================
+// GET ASSESSMENT SUBMISSIONS
+// Instructor - Student Submissions Page
+// ============================================================
+
+const getAssessmentSubmissions = async (req, res) => {
+    try {
+        const submissions =
+            await service.getSubmissionsByAssessmentId(
+                req.params.id
+            );
+
+        return res.status(200).json({
+
+            success: true,
+            data: submissions
+        });
+
+    } catch (error) {
+        console.error(
+            "Get assessment submissions error:",
+            error
+        );
+
+        if (
+            error.message ===
+            "Assessment not found"
+        ) {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
 
 // ============================================================
 // ADMIN - CREATE CODING QUESTION
@@ -541,30 +638,56 @@ const createCodingQuestion = async (
 
 
 // ============================================================
+// ADMIN - CREATE CODING QUESTION
+// ============================================================
+
+const createCodingQuestion = async (req, res) => {
+    try {
+        const question =
+            await service.createCodingQuestion(
+                req.body
+            );
+
+        return res.status(201).json({
+            success: true,
+            message: "Coding question created successfully",
+            data: question
+        });
+
+    } catch (error) {
+        console.error(
+            "Create coding question error:",
+            error
+        );
+
+        return sendControllerError(
+            res,
+            error,
+            [
+                "Assessment not found"
+            ]
+        );
+    }
+};
+
+
+// ============================================================
 // ADMIN - GET CODING QUESTIONS
 // ============================================================
 
-const getCodingQuestions = async (
-    req,
-    res
-) => {
-
+const getCodingQuestions = async (req, res) => {
     try {
-
         const questions =
             await service.getCodingQuestions(
                 req.params.assessmentId
             );
 
         return res.status(200).json({
-
             success: true,
-
             data: questions
         });
 
     } catch (error) {
-
         console.error(
             "Get coding questions error:",
             error
@@ -585,27 +708,19 @@ const getCodingQuestions = async (
 // ADMIN - GET CODING QUESTION BY ID
 // ============================================================
 
-const getCodingQuestionById = async (
-    req,
-    res
-) => {
-
+const getCodingQuestionById = async (req, res) => {
     try {
-
         const question =
             await service.getCodingQuestionById(
                 req.params.questionId
             );
 
         return res.status(200).json({
-
             success: true,
-
             data: question
         });
 
     } catch (error) {
-
         console.error(
             "Get coding question error:",
             error
@@ -626,13 +741,8 @@ const getCodingQuestionById = async (
 // ADMIN - UPDATE CODING QUESTION
 // ============================================================
 
-const updateCodingQuestion = async (
-    req,
-    res
-) => {
-
+const updateCodingQuestion = async (req, res) => {
     try {
-
         const question =
             await service.updateCodingQuestion(
                 req.params.questionId,
@@ -640,17 +750,12 @@ const updateCodingQuestion = async (
             );
 
         return res.status(200).json({
-
             success: true,
-
-            message:
-                "Coding question updated successfully",
-
+            message: "Coding question updated successfully",
             data: question
         });
 
     } catch (error) {
-
         console.error(
             "Update coding question error:",
             error
@@ -671,27 +776,18 @@ const updateCodingQuestion = async (
 // ADMIN - DELETE CODING QUESTION
 // ============================================================
 
-const deleteCodingQuestion = async (
-    req,
-    res
-) => {
-
+const deleteCodingQuestion = async (req, res) => {
     try {
-
         await service.deleteCodingQuestion(
             req.params.questionId
         );
 
         return res.status(200).json({
-
             success: true,
-
-            message:
-                "Coding question deleted successfully"
+            message: "Coding question deleted successfully"
         });
 
     } catch (error) {
-
         console.error(
             "Delete coding question error:",
             error
@@ -712,13 +808,8 @@ const deleteCodingQuestion = async (
 // ADMIN - CREATE CODING TEST CASE
 // ============================================================
 
-const createCodingTestCase = async (
-    req,
-    res
-) => {
-
+const createCodingTestCase = async (req, res) => {
     try {
-
         const testCase =
             await service.createCodingTestCase(
                 req.params.questionId,
@@ -726,17 +817,12 @@ const createCodingTestCase = async (
             );
 
         return res.status(201).json({
-
             success: true,
-
-            message:
-                "Coding test case created successfully",
-
+            message: "Coding test case created successfully",
             data: testCase
         });
 
     } catch (error) {
-
         console.error(
             "Create coding test case error:",
             error
@@ -757,27 +843,19 @@ const createCodingTestCase = async (
 // ADMIN - GET CODING TEST CASES
 // ============================================================
 
-const getCodingTestCases = async (
-    req,
-    res
-) => {
-
+const getCodingTestCases = async (req, res) => {
     try {
-
         const testCases =
             await service.getCodingTestCases(
                 req.params.questionId
             );
 
         return res.status(200).json({
-
             success: true,
-
             data: testCases
         });
 
     } catch (error) {
-
         console.error(
             "Get coding test cases error:",
             error
@@ -798,13 +876,8 @@ const getCodingTestCases = async (
 // ADMIN - UPDATE CODING TEST CASE
 // ============================================================
 
-const updateCodingTestCase = async (
-    req,
-    res
-) => {
-
+const updateCodingTestCase = async (req, res) => {
     try {
-
         const testCase =
             await service.updateCodingTestCase(
                 req.params.testCaseId,
@@ -812,17 +885,12 @@ const updateCodingTestCase = async (
             );
 
         return res.status(200).json({
-
             success: true,
-
-            message:
-                "Coding test case updated successfully",
-
+            message: "Coding test case updated successfully",
             data: testCase
         });
 
     } catch (error) {
-
         console.error(
             "Update coding test case error:",
             error
@@ -843,27 +911,18 @@ const updateCodingTestCase = async (
 // ADMIN - DELETE CODING TEST CASE
 // ============================================================
 
-const deleteCodingTestCase = async (
-    req,
-    res
-) => {
-
+const deleteCodingTestCase = async (req, res) => {
     try {
-
         await service.deleteCodingTestCase(
             req.params.testCaseId
         );
 
         return res.status(200).json({
-
             success: true,
-
-            message:
-                "Coding test case deleted successfully"
+            message: "Coding test case deleted successfully"
         });
 
     } catch (error) {
-
         console.error(
             "Delete coding test case error:",
             error
@@ -886,22 +945,27 @@ const deleteCodingTestCase = async (
 
 module.exports = {
 
-    // Existing assessment APIs
+    // Assessment APIs
     createAssessment,
+    getAllAssessments,
+    updateAssessment,
+    deleteAssessment,
     getAssessmentById,
-    submitAssessment,
+    getEnrollmentAssessmentStatus,
     startAssessment,
+    submitAssessment,
     getAssessmentAnalytics,
+    getAssessmentSubmissions,
     getAssessmentSubmissionResult,
 
-    // Admin coding question APIs
+    // Coding Question APIs
     createCodingQuestion,
     getCodingQuestions,
     getCodingQuestionById,
     updateCodingQuestion,
     deleteCodingQuestion,
 
-    // Admin coding test case APIs
+    // Coding Test Case APIs
     createCodingTestCase,
     getCodingTestCases,
     updateCodingTestCase,

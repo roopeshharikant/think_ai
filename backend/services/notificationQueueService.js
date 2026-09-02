@@ -2,6 +2,8 @@
 // No Redis/Bull installed today — this is a lightweight FIFO queue
 // processed on an interval. Swap for Bull+Redis later if needed.
 
+const { sendEmail, sendSMS } = require("../utils/mailer");
+const { users } = require("../data/users");
 const queue = [];
 let processing = false;
 
@@ -31,19 +33,35 @@ async function processNext() {
 
   job.status = "processing";
   job.attempts++;
+const { getPreferencesByUserId } = require("./notificationPreferenceService");
+ try {
+  const user = users.find((u) => u.id === job.userId);
+  const prefs = getPreferencesByUserId(job.userId);
 
-  try {
-    // Simulated delivery — replace with real email/SMS/push service later
-    console.log(`[queue] Processing job ${job.id}: ${job.type} -> user ${job.userId}`);
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    job.status = "completed";
-    job.completedAt = new Date().toISOString();
-  } catch (err) {
-    job.status = job.attempts >= 3 ? "failed" : "pending";
-    job.error = err.message;
+  if (!user) {
+    throw new Error(`No user found for id ${job.userId}`);
   }
 
+  if (!prefs || prefs.emailEnabled) {
+    await sendEmail({
+      to: user.email,
+      subject: `Thinkz AI: ${job.type}`,
+      text: `Hi ${user.name}, you have a new notification: ${job.type}.`,
+    });
+  } else {
+    console.log(`[queue] Skipped email for ${user.email} — emailEnabled is false`);
+  }
+
+  if (prefs && prefs.smsEnabled) {
+    await sendSMS({ to: user.phone, text: `Thinkz AI: ${job.type}` });
+  }
+
+  job.status = "completed";
+  job.completedAt = new Date().toISOString();
+} catch (err) {
+  job.status = job.attempts >= 3 ? "failed" : "pending";
+  job.error = err.message;
+}
   return job;
 }
 

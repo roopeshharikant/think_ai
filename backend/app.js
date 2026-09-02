@@ -6,84 +6,62 @@ const path = require("path");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 
-
 // ============================================================
 // ROUTES
 // ============================================================
 
-const courseRoutes =
-    require("./routes/courseRoutes");
+const authRoutes = require("./routes/authRoutes");
+const adminUsersRoutes = require("./routes/adminUsers");
+const roleRoutes = require("./routes/roleMatrix");
 
-const batchRoutes =
-    require("./routes/batchRoutes");
+const courseRoutes = require("./routes/courseRoutes");
+const batchRoutes = require("./routes/batchRoutes");
+const enrollmentRoutes = require("./routes/enrollmentRoutes");
 
-const enrollmentRoutes =
-    require("./routes/enrollmentRoutes");
+const moduleRoutes = require("./routes/moduleRoutes");
+const lessonRoutes = require("./routes/lessonRoutes");
+const lessonProgressRoutes = require("./routes/lessonProgressRoutes");
 
-const authRoutes =
-    require("./routes/authRoutes");
+const certificateRoutes = require("./routes/certificateRoutes");
+const assessmentRoutes = require("./routes/assessmentRoutes");
+const codeExecutionRoutes = require("./routes/codeExecutionRoutes");
 
-const adminUsers =
-    require("./routes/adminUsers");
+const auditLogRoutes = require("./routes/auditLog");
+const analyticsRoutes = require("./routes/analytics");
 
-const roleRoutes =
-    require("./routes/roleRoutes");
-
-const demoRoutes =
-    require("./routes/demoRoutes");
-
-const moduleRoutes =
-    require("./routes/moduleRoutes");
-
-const lessonRoutes =
-    require("./routes/lessonRoutes");
-
-const lessonProgressRoutes =
-    require("./routes/lessonProgressRoutes");
-
-const certificateRoutes =
-    require("./routes/certificateRoutes");
-
-const assessmentRoutes =
-    require("./routes/assessmentRoutes");
-
-const codeExecutionRoutes =
-    require("./routes/codeExecutionRoutes");
-
-const auditLogRoutes =
-    require("./routes/auditLogs");
-
-const analyticsRoutes =
-    require("./routes/analytics");
-
-
-// ============================================================
-// ADMIN CODING QUESTION ROUTES
-// ============================================================
+const notificationPreferenceRoutes =
+    require("./routes/notificationPreferences");
 
 const adminCodingQuestionRoutes =
     require("./routes/adminCodingQuestionRoutes");
 
+const demoRoutes = require("./routes/demoRoutes");
+
+// Optional broader project routes
+const sessionRoutes = require("./routes/sessionRoutes");
+const studioRoutes = require("./routes/studioRoutes");
 
 // ============================================================
 // SESSION / PASSPORT
 // ============================================================
 
-const session =
-    require("express-session");
-
-const passport =
-    require("passport");
+const session = require("express-session");
+const passport = require("passport");
 
 require("./config/passport");
 
+// ============================================================
+// DATABASE CONFIG
+// ============================================================
+
+// Keep this if your project uses this DB configuration.
+require("./config/db");
 
 // ============================================================
 // APP
 // ============================================================
 
 const app = express();
-
 
 // ============================================================
 // GLOBAL MIDDLEWARE
@@ -103,10 +81,7 @@ app.use(
     })
 );
 
-app.use(
-    morgan("dev")
-);
-
+app.use(morgan("dev"));
 
 // ============================================================
 // SESSION
@@ -124,74 +99,29 @@ app.use(
     })
 );
 
-app.use(
-    passport.initialize()
-);
+app.use(passport.initialize());
 
-app.use(
-    passport.session()
-);
-
-
-// ============================================================
-// DEMO ROUTES
-// ============================================================
-
-app.use(
-    "/api/demo",
-    demoRoutes
-);
-
-
-// ============================================================
-// AUDIT LOGS
-// ============================================================
-
-app.use(
-    "/api/audit-logs",
-    auditLogRoutes
-);
-
-
-// ============================================================
-// ANALYTICS
-// ============================================================
-
-app.use(
-    "/api/analytics",
-    analyticsRoutes
-);
-
+app.use(passport.session());
 
 // ============================================================
 // SWAGGER
 // ============================================================
 
 const swaggerOptions = {
-
     definition: {
-
         openapi: "3.0.0",
 
         info: {
-
-            title:
-                "Thinkz LMS API",
-
-            version:
-                "1.0.0",
-
+            title: "Thinkz LMS API",
+            version: "1.0.0",
             description:
-                "Course, Batch, Enrollment, Assessment and Code Execution APIs"
+                "Course, Batch, Enrollment, Assessment, Code Execution, Certificate and Live Studio APIs"
         },
 
         servers: [
-
             {
-                url:
-                    "http://localhost:5000"
+                url: "http://localhost:5000"
             }
-
         ]
     },
 
@@ -200,62 +130,84 @@ const swaggerOptions = {
     ]
 };
 
-
-const swaggerSpec =
-    swaggerJsdoc(
-        swaggerOptions
-    );
-
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 app.use(
     "/api-docs",
     swaggerUi.serve,
-    swaggerUi.setup(
-        swaggerSpec
-    )
+    swaggerUi.setup(swaggerSpec)
 );
-
 
 // ============================================================
 // HEALTH CHECK
 // ============================================================
 
-app.get(
-    "/",
-    (req, res) => {
+app.get("/", (req, res) => {
+    return res.status(200).json({
+        success: true,
+        message: "Thinkz LMS Backend Running Successfully"
+    });
+});
 
-        return res.status(200).json({
+app.get("/health", (req, res) => {
+    return res.status(200).json({
+        status: "ok",
+        service: "think-ai-backend"
+    });
+});
 
-            success: true,
-
-            message:
-                "Thinkz LMS Backend Running Successfully"
-        });
-    }
-);
-
-
-app.get(
-    "/api/health",
-    (req, res) => {
-
-        return res.status(200).json({
-
-            status:
-                "healthy",
-
-            service:
-                "think-ai-backend",
-
-            timestamp:
-                new Date().toISOString()
-        });
-    }
-);
-
+app.get("/api/health", (req, res) => {
+    return res.status(200).json({
+        status: "healthy",
+        service: "think-ai-backend",
+        timestamp: new Date().toISOString()
+    });
+});
 
 // ============================================================
-// CERTIFICATE STATIC FILES
+// API ROUTES
+// ============================================================
+
+app.use("/api/auth", authRoutes);
+
+app.use("/api/admin", adminUsersRoutes);
+
+app.use("/api/admin", adminCodingQuestionRoutes);
+
+app.use("/api/roles", roleRoutes);
+
+app.use("/api/courses", courseRoutes);
+
+app.use("/api/batches", batchRoutes);
+
+app.use("/api/enrollments", enrollmentRoutes);
+
+app.use("/api/modules", moduleRoutes);
+
+app.use("/api/lessons", lessonRoutes);
+
+app.use("/api/lesson-progress", lessonProgressRoutes);
+
+app.use("/api/certificates", certificateRoutes);
+
+app.use("/api/assessments", assessmentRoutes);
+
+app.use("/api/code", codeExecutionRoutes);
+
+app.use("/api/sessions", sessionRoutes);
+
+app.use("/api/studio", studioRoutes);
+
+app.use("/api/audit-logs", auditLogRoutes);
+
+app.use("/api/analytics", analyticsRoutes);
+
+app.use("/api/notifications", notificationPreferenceRoutes);
+
+app.use("/api/demo", demoRoutes);
+
+// ============================================================
+// STATIC CERTIFICATE FILES
 // ============================================================
 
 app.use(
@@ -268,184 +220,43 @@ app.use(
     )
 );
 
-
 // ============================================================
-// COURSE ROUTES
-// ============================================================
-
-app.use(
-    "/api/courses",
-    courseRoutes
-);
-
-
-// ============================================================
-// BATCH ROUTES
+// ADDITIONAL PROJECT ROUTES
 // ============================================================
 
-app.use(
-    "/api/batches",
-    batchRoutes
-);
-
-
-// ============================================================
-// ENROLLMENT ROUTES
-// ============================================================
-
-app.use(
-    "/api/enrollments",
-    enrollmentRoutes
-);
-
-
-// ============================================================
-// AUTH ROUTES
-// ============================================================
-
-app.use(
-    "/api/auth",
-    authRoutes
-);
-
-
-// ============================================================
-// ADMIN USER ROUTES
-// ============================================================
-
-app.use(
-    "/api/admin",
-    adminUsers
-);
-
-
-// ============================================================
-// ROLE ROUTES
-// ============================================================
-
-app.use(
-    "/api/roles",
-    roleRoutes
-);
-
-
-// ============================================================
-// MODULE ROUTES
-// ============================================================
-
-app.use(
-    "/api/modules",
-    moduleRoutes
-);
-
-
-// ============================================================
-// LESSON ROUTES
-// ============================================================
-
-app.use(
-    "/api/lessons",
-    lessonRoutes
-);
-
-
-// ============================================================
-// LESSON PROGRESS ROUTES
-// ============================================================
-
-app.use(
-    "/api/lesson-progress",
-    lessonProgressRoutes
-);
-
-
-// ============================================================
-// CERTIFICATE ROUTES
-// ============================================================
-
-app.use(
-    "/api/certificates",
-    certificateRoutes
-);
-
-
-// ============================================================
-// ASSESSMENT ROUTES
-// ============================================================
-
-app.use(
-    "/api/assessments",
-    assessmentRoutes
-);
-
-
-// ============================================================
-// ADMIN CODING QUESTION ROUTES
-// ============================================================
-
-app.use(
-    "/api/admin",
-    adminCodingQuestionRoutes
-);
-
-
-// ============================================================
-// CODE EXECUTION / JUDGE0
-// ============================================================
-
-app.use(
-    "/api/code",
-    codeExecutionRoutes
-);
-
+// Keep this only if ./src/routes actually exists in your project.
+app.use("/api", require("./src/routes"));
 
 // ============================================================
 // 404 HANDLER
 // ============================================================
 
-app.use(
-    (req, res) => {
-
-        return res.status(404).json({
-
-            success: false,
-
-            message:
-                `Route not found: ${req.method} ${req.originalUrl}`
-        });
-    }
-);
-
+app.use((req, res) => {
+    return res.status(404).json({
+        success: false,
+        message:
+            `Route not found: ${req.method} ${req.originalUrl}`
+    });
+});
 
 // ============================================================
 // GLOBAL ERROR HANDLER
 // ============================================================
 
-app.use(
-    (error, req, res, next) => {
+app.use((error, req, res, next) => {
+    console.error("Global error:", error);
 
-        console.error(
-            "Global error:",
-            error
-        );
-
-        if (res.headersSent) {
-            return next(error);
-        }
-
-        return res.status(
-            error.status || 500
-        ).json({
-
-            success: false,
-
-            message:
-                error.message ||
-                "Internal server error"
-        });
+    if (res.headersSent) {
+        return next(error);
     }
-);
 
+    return res.status(error.status || 500).json({
+        success: false,
+        message:
+            error.message ||
+            "Internal server error"
+    });
+});
 
 // ============================================================
 // EXPORT

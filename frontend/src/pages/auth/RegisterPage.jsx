@@ -109,21 +109,22 @@ export default function RegisterPage() {
               disabled={loading}
               label={loading ? 'Begin Sequence...' : 'Begin Registration'}
             />
-          </form>
-        </div>
 
-        <div className="w-full max-w-md bg-gray-900 border border-gray-800 p-6 rounded-2xl text-center space-y-2">
-          <p className="text-sm text-gray-400">
-            Already have an account?{' '}
-            <Link to="/login" className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors">
-              Log in
-            </Link>
-          </p>
-          <p className="text-sm text-gray-400">
-            <Link to="/" className="text-[#C77DFF] font-semibold hover:text-[#A435F0] transition-colors">
-              ← Back to Home Page
-            </Link>
-          </p>
+            {/* Centered Footer Links */}
+            <div className="flex flex-col items-center justify-center text-center space-y-2 pt-2">
+              <p className="text-sm text-gray-400">
+                Already have an account?{' '}
+                <Link to="/login" className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors">
+                  Log in
+                </Link>
+              </p>
+              <p className="text-sm text-gray-400">
+                <Link to="/" className="text-[#C77DFF] font-semibold hover:text-[#A435F0] transition-colors">
+                  ← Back to Home Page
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

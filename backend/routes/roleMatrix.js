@@ -60,5 +60,23 @@ router.get("/matrix", requireRole(["Admin"]), (req, res) => {
     grants,
   });
 });
+/**
+ * PATCH /api/roles/:role/permissions/:permission
+ * Grants or revokes a permission for a role.
+ * Body: { granted: true|false }
+ */
+router.patch("/:role/permissions/:permission", requireRole(["Admin"]), (req, res) => {
+  const { role, permission } = req.params;
+  const { granted } = req.body;
 
+  if (!grants[role]) {
+    return res.status(404).json({ success: false, message: "Role not found" });
+  }
+
+  const current = new Set(grants[role]);
+  granted ? current.add(permission) : current.delete(permission);
+  grants[role] = Array.from(current);
+
+  res.status(200).json({ success: true, role, permission, granted });
+});
 module.exports = router;

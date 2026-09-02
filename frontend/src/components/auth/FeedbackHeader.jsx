@@ -40,16 +40,18 @@ export default function FeedbackHeader({
         {title}
       </h1>
 
-      <p className="text-white text-xs lg:text-sm max-w-lg mx-auto leading-relaxed">
-        {description}
-      </p>
+      {description && (
+        <p className="text-white text-xs lg:text-sm max-w-lg mx-auto leading-relaxed">
+          {description}
+        </p>
+      )}
     </div>
   );
 }
 
 FeedbackHeader.propTypes = {
   title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
+  description: PropTypes.string,
   status: PropTypes.oneOf(['default', 'success', 'error', 'warning']),
   align: PropTypes.oneOf(['left', 'center', 'right']),
 };

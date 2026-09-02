@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { useTheme } from '../components/ThemeContext';
 import Branding from '../components/auth/Branding';
+import NotificationDropdown from '../components/preferenceNotification/PreferenceNotificationsDropDown';
+import { selectUnreadCount } from '../features/preferenceNotification/preferenceNotificationSlice';
 
 const NAV_ITEMS = [
   { to: '/admin/dashboard', label: 'Dashboard' },
@@ -14,6 +16,7 @@ const NAV_ITEMS = [
   { to: '/admin/enrollments', label: 'Enrollments' },
   { to: '/admin/modules', label: 'Modules' },
   { to: '/admin/lessons', label: 'Lessons' },
+  { to: '/admin/assessments', label: 'Assessments' },
 ];
 
 export default function AdminLayout() {
@@ -21,6 +24,9 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const { isDarkMode, toggleTheme } = useTheme();
+
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const unreadCount = useSelector(selectUnreadCount);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -38,25 +44,24 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className={`min-h-screen w-full flex flex-col md:flex-row transition-colors duration-300 ${isDarkMode ? 'bg-[#151821] text-[#f1f3f9]' : 'bg-slate-50 text-slate-900'}`}>
-      
+    <div className={`h-screen w-screen flex flex-col md:flex-row overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-[#151821] text-[#f1f3f9]' : 'bg-slate-50 text-slate-900'}`}>
+
       {/* Desktop Sidebar */}
-      <aside className={`hidden md:flex w-64 flex-col border-r p-6 sticky top-0 h-screen shrink-0 transition-colors duration-300 ${isDarkMode ? 'border-[#262b38] bg-[#1a1e2b]' : 'border-slate-200 bg-white'}`}>
+      <aside className={`hidden md:flex w-64 flex-col border-r p-6 h-full shrink-0 transition-colors duration-300 ${isDarkMode ? 'border-[#262b38] bg-[#1a1e2b]' : 'border-slate-200 bg-white'}`}>
         <Branding size="small" />
-        <nav className="mt-10 flex flex-col gap-1">
+        <nav className="mt-10 flex flex-col gap-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? isDarkMode 
-                      ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' 
-                      : 'bg-cyan-50 text-cyan-700 border border-cyan-200'
-                    : isDarkMode 
-                      ? 'text-[#94a3b8] hover:text-white hover:bg-[#222736]' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                `px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
+                  ? isDarkMode
+                    ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
+                    : 'bg-cyan-50 text-cyan-700 border border-cyan-200'
+                  : isDarkMode
+                    ? 'text-[#94a3b8] hover:text-white hover:bg-[#222736]'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`
               }
             >
@@ -67,10 +72,10 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content Area Wrapper */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
+      <div className="flex-1 flex flex-col h-full min-w-0 relative">
+
         {/* Sticky Header */}
-        <header className={`sticky top-0 flex items-center justify-between border-b px-4 sm:px-8 py-4 z-35 backdrop-blur-md transition-colors duration-300 ${isDarkMode ? 'bg-[#1a1e2b]/90 border-[#262b38]' : 'bg-white/90 border-slate-200'}`}>
+        <header className={`shrink-0 flex items-center justify-between border-b px-4 sm:px-8 py-4 z-10 backdrop-blur-md transition-colors duration-300 ${isDarkMode ? 'bg-[#1a1e2b]/90 border-[#262b38]' : 'bg-white/90 border-slate-200'}`}>
           <div className="flex items-center gap-3">
             {/* Mobile Hamburger Menu Toggle Button */}
             <button
@@ -96,8 +101,28 @@ export default function AdminLayout() {
             <p className={`text-sm hidden sm:block ${isDarkMode ? 'text-[#94a3b8]' : 'text-slate-600'}`}>Admin Console</p>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6">
-            
+          <div className="flex items-center gap-3 sm:gap-4">
+
+            {/* Notification Bell Icon */}
+            <div className="relative">
+              <button
+                onClick={() => setIsNotifOpen(!isNotifOpen)}
+                className={`p-2.5 rounded-xl transition-colors cursor-pointer border relative ${isDarkMode ? 'bg-[#222736] border-[#313849] text-[#94a3b8] hover:text-white' : 'bg-slate-100 border-slate-300 text-slate-700'}`}
+                title="Notifications"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-purple-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              <NotificationDropdown isOpen={isNotifOpen} onClose={() => setIsNotifOpen(false)} />
+            </div>
+
             {/* Dark/Light Mode Toggle Button */}
             <button
               onClick={toggleTheme}
@@ -107,6 +132,7 @@ export default function AdminLayout() {
               {isDarkMode ? '☀️ Light' : '🌙 Dark'}
             </button>
 
+            {/* Profile Dropdown Container */}
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -132,8 +158,17 @@ export default function AdminLayout() {
                 </svg>
               </button>
 
+              {/* Backdrop for closing dropdown on click outside */}
               {isDropdownOpen && (
-                <div className={`absolute top-full right-0 mt-2 w-48 border rounded-lg shadow-xl z-20 overflow-hidden ${isDarkMode ? 'bg-[#1a1e2b] border-[#262b38] text-[#f1f3f9]' : 'bg-white border-slate-200 text-slate-700'}`}>
+                <div
+                  className="fixed inset-0 z-40 bg-transparent"
+                  onClick={() => setIsDropdownOpen(false)}
+                />
+              )}
+
+              {/* Dropdown Menu Items */}
+              {isDropdownOpen && (
+                <div className={`absolute top-full right-0 mt-2 w-48 border rounded-lg shadow-xl z-50 overflow-hidden ${isDarkMode ? 'bg-[#1a1e2b] border-[#262b38] text-[#f1f3f9]' : 'bg-white border-slate-200 text-slate-700'}`}>
                   <ul className="text-sm">
                     <li>
                       <NavLink to="/admin/profile" onClick={handleLinkClick} className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${isDarkMode ? 'hover:bg-[#222736]' : 'hover:bg-slate-100'}`}>
@@ -163,42 +198,37 @@ export default function AdminLayout() {
 
         {/* Mobile Nav Drawer */}
         {isMobileMenuOpen && (
-          <div className={`md:hidden border-b px-4 py-4 space-y-1 shadow-xl z-30 relative transition-colors duration-300 ${isDarkMode ? 'bg-[#1a1e2b] text-white border-[#262b38]' : 'bg-white text-slate-900 border-slate-200'}`}>
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                onClick={handleLinkClick}
-                className={({ isActive }) =>
-                  `block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? isDarkMode 
-                        ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30' 
+          <>
+            <div className="fixed inset-0 z-20 bg-black/40 md:hidden" onClick={() => setIsMobileMenuOpen(false)} />
+            <div className={`md:hidden border-b px-4 py-4 space-y-1 shadow-xl z-30 relative transition-colors duration-300 ${isDarkMode ? 'bg-[#1a1e2b] text-white border-[#262b38]' : 'bg-white text-slate-900 border-slate-200'}`}>
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  onClick={handleLinkClick}
+                  className={({ isActive }) =>
+                    `block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive
+                      ? isDarkMode
+                        ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
                         : 'bg-cyan-50 text-cyan-700'
-                      : isDarkMode 
-                        ? 'text-[#94a3b8] hover:text-white hover:bg-[#222736]' 
+                      : isDarkMode
+                        ? 'text-[#94a3b8] hover:text-white hover:bg-[#222736]'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
+                    }`
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+          </>
         )}
 
-        {/* Main Content View with Page Scroll Support */}
-        <main className="flex-1 p-4 sm:p-8 z-0">
+        {/* Dedicated Scrollable Content Container */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8">
           <Outlet />
         </main>
       </div>
-
-      {(isDropdownOpen || isMobileMenuOpen) && (
-        <div
-          className="fixed inset-0 bg-transparent z-20"
-          onClick={() => { setIsDropdownOpen(false); setIsMobileMenuOpen(false); }}
-        />
-      )}
     </div>
   );
 }

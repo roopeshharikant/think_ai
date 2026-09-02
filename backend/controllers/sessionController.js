@@ -8,10 +8,10 @@ let attendance = [];
  */
 const createSession = async (req, res) => {
     try {
-        const { title, instructorId, startTime, endTime } = req.body;
+        const { title, startTime, endTime, platform } = req.body;
 
         // Validate required fields
-        if (!title || !instructorId || !startTime) {
+        if (!title || !startTime || !platform) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
@@ -22,7 +22,7 @@ const createSession = async (req, res) => {
         const newSession = {
             id: Date.now().toString(), // Generate a unique ID string
             title,
-            instructorId,
+        
             startTime: new Date(startTime), // FIXED: added space to 'new Date'
             endTime: endTime ? new Date(endTime) : null,
             status: "SCHEDULED", 

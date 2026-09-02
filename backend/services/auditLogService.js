@@ -20,6 +20,10 @@ function logRoleChange({ actorRole, targetUserId, targetUserName, oldRole, newRo
   return entry;
 }
 
+function toJSON(entries) {
+  return JSON.stringify(entries, null, 2);
+}
+
 function getEntries({ role, action, from, to } = {}) {
   return auditLog.filter((entry) => {
     if (role && entry.actorRole !== role && entry.newRole !== role) return false;
@@ -38,4 +42,4 @@ function toCSV(entries) {
   return [header, ...rows].join("\n");
 }
 
-module.exports = { logRoleChange, getEntries, toCSV };
+module.exports = { logRoleChange, getEntries, toCSV, toJSON };

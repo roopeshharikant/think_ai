@@ -27,21 +27,35 @@ export default function LoginPage() {
   const [params] = useSearchParams();
 
   const user = useSelector(selectUser);
+  // ✅ Fixed: Destructured loading and error properly from state.auth
   const { loading, error } = useSelector((state) => state.auth);
 
+  // Single source of truth for routing when user state changes
   useEffect(() => {
-    if (user) navigate(ROLE_HOME[user.role] || '/learner', { replace: true });
+    if (user?.role) {
+      const destination = ROLE_HOME[user.role] || '/learner';
+      navigate(destination, { replace: true });
+    }
   }, [user, navigate]);
 
   useEffect(() => {
-    return () => dispatch(clearAuthError());
+    return () => {
+      dispatch(clearAuthError());
+    };
   }, [dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(loginUser({ email, password }));
+    console.log("📦 Full login result payload:", result);
+
     if (loginUser.fulfilled.match(result)) {
-      navigate(ROLE_HOME[result.payload.user.role]);
+      const loggedInUser = result.payload.user;
+      const destination = ROLE_HOME[loggedInUser?.role] || '/learner';
+      console.log("🚀 Navigating directly to:", destination);
+      navigate(destination, { replace: true });
+    } else {
+      console.error("❌ Login failed to fulfill:", result.payload);
     }
   };
 
@@ -59,7 +73,7 @@ export default function LoginPage() {
           <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
             Continue building your future in <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">Software Engineering</span>.
           </h1>
-          
+
           <p className="text-slate-400 text-base leading-relaxed">
             Pick up right where you left off. Dive into your course catalog, test code in the live sandbox, and level up your backend &amp; full-stack skills.
           </p>
@@ -123,9 +137,9 @@ export default function LoginPage() {
                 checked={keepAlive}
                 onChange={(e) => setKeepAlive(e.target.checked)}
               />
-              <a href="#" className="text-[#C77DFF] hover:text-[#A435F0] transition-colors hover:drop-shadow-[0_0_8px_rgba(164,53,240,0.5)]">
+              <Link to="/forgot-password" className="text-[#C77DFF] hover:text-[#A435F0] transition-colors hover:drop-shadow-[0_0_8px_rgba(164,53,240,0.5)]">
                 Reset Password?
-              </a>
+              </Link>
             </div>
 
             <Button
@@ -133,21 +147,22 @@ export default function LoginPage() {
               disabled={loading}
               label={loading ? 'Authenticating...' : 'Continue'}
             />
-          </form>
-        </div>
 
-        <div className="w-full max-w-md bg-gray-900 border border-gray-800 p-6 rounded-2xl text-center space-y-2">
-          <p className="text-sm text-gray-400">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors">
-              Sign up
-            </Link>
-          </p>
-          <p className="text-sm text-gray-400">
-            <Link to="/" className="text-[#C77DFF] font-semibold hover:text-[#A435F0] transition-colors">
-              ← Back to Home Page
-            </Link>
-          </p>
+            {/* Centered Footer Links */}
+            <div className="flex flex-col items-center justify-center text-center space-y-2 pt-2">
+              <p className="text-sm text-gray-400">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors">
+                  Sign up
+                </Link>
+              </p>
+              <p className="text-sm text-gray-400">
+                <Link to="/" className="text-[#C77DFF] font-semibold hover:text-[#A435F0] transition-colors">
+                  ← Back to Home Page
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

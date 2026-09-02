@@ -2,14 +2,17 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import {
   getUsersApi,
   createUserApi,
-  updateUserRoleApi,
-} from './adminUserService'
+  updateUserApi,
+  deleteUserApi,
+} from '../../api/adminUserApi'
 
 const initialState = {
   items: [],
   loading: false,
   error: null,
 }
+
+const getId = (u) => u?.id || u?._id
 
 export const fetchUsers = createAsyncThunk(
   'adminUsers/fetchUsers',
@@ -36,14 +39,26 @@ export const createUser = createAsyncThunk(
   }
 )
 
-export const updateUserRole = createAsyncThunk(
-  'adminUsers/updateUserRole',
-  async ({ userId, role }, { rejectWithValue }) => {
+export const updateUser = createAsyncThunk(
+  'adminUsers/updateUser',
+  async ({ userId, data }, { rejectWithValue }) => {
     try {
-      const response = await updateUserRoleApi(userId, role)
+      const response = await updateUserApi(userId, data)
       return response.data.data
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to update role')
+      return rejectWithValue(err.response?.data?.message || 'Failed to update user')
+    }
+  }
+)
+
+export const deleteUser = createAsyncThunk(
+  'adminUsers/deleteUser',
+  async (userId, { rejectWithValue }) => {
+    try {
+      await deleteUserApi(userId)
+      return userId
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to delete user')
     }
   }
 )
@@ -76,12 +91,18 @@ const adminUserSlice = createSlice({
       .addCase(createUser.rejected, (state, action) => {
         state.error = action.payload
       })
-      .addCase(updateUserRole.fulfilled, (state, action) => {
+      .addCase(updateUser.fulfilled, (state, action) => {
         if (!action.payload) return
-        const index = state.items.findIndex((u) => u.id === action.payload.id)
+        const index = state.items.findIndex((u) => getId(u) === getId(action.payload))
         if (index !== -1) state.items[index] = action.payload
       })
-      .addCase(updateUserRole.rejected, (state, action) => {
+      .addCase(updateUser.rejected, (state, action) => {
+        state.error = action.payload
+      })
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.items = state.items.filter((u) => getId(u) !== action.payload)
+      })
+      .addCase(deleteUser.rejected, (state, action) => {
         state.error = action.payload
       })
   },

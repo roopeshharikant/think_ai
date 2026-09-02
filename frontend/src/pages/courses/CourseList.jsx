@@ -20,15 +20,11 @@ export default function CourseList({
   onRetry,
 }) {
   const user = useSelector(selectUser);
-  
-  // Check if current user has admin privileges
   const isAdmin = user?.role === 'Admin' || user?.role === 'ADMIN' || user?.isAdmin;
-
-  // Sort courses by ID in ascending order
   const sortedCourses = Array.isArray(courses) ? [...courses].sort((a, b) => (a.id || 0) - (b.id || 0)) : [];
 
   return (
-    <div className="relative z-10 w-full bg-[#131824] backdrop-blur-2xl rounded-2xl p-4 sm:p-6 border border-purple-500/20 shadow-[0_8px_32px_rgba(0,0,0,0.6)] space-y-6">
+    <div className="relative z-10 w-full bg-white dark:bg-[#2b2b2b] backdrop-blur-2xl rounded-2xl p-4 sm:p-6 border border-gray-200 dark:border-[#3f3f3f] shadow-sm space-y-6">
       
       {/* Search Input */}
       <div className="max-w-sm relative">
@@ -37,16 +33,16 @@ export default function CourseList({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by course name..."
-          className="w-full bg-[#0b0e14] border border-slate-700 text-purple-100 placeholder-slate-500 focus:border-purple-400 focus:ring-purple-400/50 rounded-lg px-4 py-2.5 text-sm outline-none transition-all shadow-inner"
+          className="w-full bg-gray-50 dark:bg-[#212121] border border-gray-300 dark:border-[#3f3f3f] text-gray-900 dark:text-white placeholder-gray-400 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm outline-none transition-all"
         />
-        <svg className="absolute right-3 top-3 h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="absolute right-3 top-3 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
         </svg>
       </div>
 
       {loading && (
         <div className="py-20 flex items-center justify-center">
-          <LoadingSpinner label="Loading courses..." className="text-purple-400" />
+          <LoadingSpinner label="Loading courses..." className="text-purple-500" />
         </div>
       )}
 
@@ -58,7 +54,6 @@ export default function CourseList({
 
       {!loading && !error && (
         <>
-          {/* Grid Layout */}
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {sortedCourses.map((c) => (
               <CourseCard 
@@ -72,29 +67,29 @@ export default function CourseList({
             ))}
             
             {sortedCourses.length === 0 && (
-              <div className="col-span-full py-16 flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-xl bg-[#0b0e14]/40">
-                <p className="text-slate-400 text-xs tracking-widest uppercase">No courses found.</p>
+              <div className="col-span-full py-16 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-[#212121]/40">
+                <p className="text-gray-500 dark:text-gray-400 text-xs tracking-widest uppercase">No courses found.</p>
               </div>
             )}
           </div>
 
           {/* Pagination Controls */}
           {(currentPage > 1 || hasNextPage) && (
-            <div className="flex justify-center items-center gap-4 pt-4 border-t border-slate-800">
+            <div className="flex justify-center items-center gap-4 pt-4 border-t border-gray-200 dark:border-[#3f3f3f]">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-4 py-2 rounded-lg bg-[#0b0e14] border border-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-purple-900/30 transition-all text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#212121] border border-gray-300 dark:border-[#3f3f3f] text-gray-700 dark:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-[#3f3f3f] transition-all text-xs font-semibold cursor-pointer"
               >
                 &larr; Prev
               </button>
-              <span className="text-slate-400 text-xs font-medium tracking-wider uppercase">
-                Page <strong className="text-white">{currentPage}</strong>
+              <span className="text-gray-600 dark:text-gray-400 text-xs font-medium tracking-wider uppercase">
+                Page <strong className="text-gray-900 dark:text-white">{currentPage}</strong>
               </span>
               <button
                 onClick={() => setCurrentPage((prev) => prev + 1)}
                 disabled={!hasNextPage}
-                className="px-4 py-2 rounded-lg bg-[#0b0e14] border border-slate-700 text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-purple-900/30 transition-all text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-[#212121] border border-gray-300 dark:border-[#3f3f3f] text-gray-700 dark:text-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-200 dark:hover:bg-[#3f3f3f] transition-all text-xs font-semibold cursor-pointer"
               >
                 Next &rarr;
               </button>

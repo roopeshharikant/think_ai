@@ -1,10 +1,5 @@
 {
-  "name": "think-ai",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "lint": "npm --prefix frontend run lint && npm --prefix backend run lint",
-    "build": "npm --prefix frontend run build && npm --prefix backend run build",
-    "test": "npm --prefix frontend run test && npm --prefix backend run test"
+  "dependencies": {
+    "socket.io": "^4.8.3"
   }
 }

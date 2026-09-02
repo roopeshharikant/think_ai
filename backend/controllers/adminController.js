@@ -1,23 +1,58 @@
-const { PrismaClient } = require('@prisma/client');
+const bcrypt = require("bcryptjs");
+const prisma = require("../config/database");
 
-const prisma = new PrismaClient();
+const createUser = async (req, res) => {
+    try {
+        const { name, email, password, role } = req.body;
 
-// Item 5: Fetch all user records
-exports.getAllUsers = async (req, res) => {
-  try {
-    const users = await prisma.user.findMany();
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and password are required"
+            });
+        }
 
-    res.status(200).json({
-      success: true,
-      users: users
-    });
-  } catch (error) {
-    console.error('Error fetching users:', error);
+        // Check if user already exists
+        const existingUser = await prisma.user.findUnique({
+            where: { email }
+        });
 
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch users',
-      error: error.message
-    });
-  }
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: "User with this email already exists"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await prisma.user.create({
+            data: {
+                name: name || null,
+                email,
+                password: hashedPassword,
+                role: role || "Learner" // Defaults to Learner if role isn't provided
+            }
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "User created successfully",
+            data: {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role
+            }
+        });
+
+    } catch (error) {
+        console.error("Create user error:", error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Failed to create user"
+        });
+    }
 };
+
+module.exports = { createUser };

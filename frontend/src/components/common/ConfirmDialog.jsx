@@ -13,17 +13,25 @@ export default function ConfirmDialog({
   if (!open) return null;
 
   return (
-    <div style={styles.overlay}>
-      <div style={styles.box}>
-        <h3 style={styles.title}>{title}</h3>
-        {message && <p style={styles.message}>{message}</p>}
-        <div style={styles.actions}>
-          <button onClick={onCancel} style={styles.cancelBtn}>
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/45 p-4 animate-[overlayIn_0.15s_ease-out]">
+      <div className="w-full max-w-sm rounded-xl bg-[#1A1F2B] border border-gray-800 p-6 shadow-2xl animate-[modalIn_0.2s_ease-out]">
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        {message && <p className="mt-2 text-sm text-gray-400">{message}</p>}
+
+        <div className="mt-5 flex items-center justify-end gap-2.5">
+          <button
+            onClick={onCancel}
+            className="rounded-lg border border-gray-700 bg-transparent px-3.5 py-2 text-sm font-medium text-gray-300 transition-all duration-150 hover:bg-white/5 hover:border-gray-600 active:scale-[0.97]"
+          >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            style={danger ? styles.dangerBtn : styles.confirmBtn}
+            className={`rounded-lg px-3.5 py-2 text-sm font-medium text-white transition-all duration-150 active:scale-[0.97] ${
+              danger
+                ? 'bg-rose-600 hover:bg-rose-500'
+                : 'bg-indigo-600 hover:bg-indigo-500'
+            }`}
           >
             {confirmLabel}
           </button>
@@ -32,29 +40,3 @@ export default function ConfirmDialog({
     </div>
   );
 }
-
-const styles = {
-  overlay: {
-    position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
-    display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
-  },
-  box: {
-    background: "#fff", borderRadius: 8, padding: "20px 24px",
-    width: "90%", maxWidth: 360, boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-  },
-  title: { margin: 0, marginBottom: 8, fontSize: 18 },
-  message: { margin: "8px 0 20px", color: "#444", fontSize: 14 },
-  actions: { display: "flex", justifyContent: "flex-end", gap: 10 },
-  cancelBtn: {
-    padding: "8px 14px", border: "1px solid #ccc", borderRadius: 6,
-    background: "#fff", cursor: "pointer",
-  },
-  confirmBtn: {
-    padding: "8px 14px", border: "none", borderRadius: 6,
-    background: "#2563eb", color: "#fff", cursor: "pointer",
-  },
-  dangerBtn: {
-    padding: "8px 14px", border: "none", borderRadius: 6,
-    background: "#dc2626", color: "#fff", cursor: "pointer",
-  },
-};

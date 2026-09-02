@@ -12,6 +12,7 @@ import rbacReducer from '../features/rbac/rbacSlice';
 import assessmentReducer from '../features/assessments/assessmentSlice';
 import searchReducer from '../features/search/searchSlice';
 import notificationReducer from '../features/preferenceNotification/preferenceNotificationSlice'; 
+import codeExecutionReducer from '../features/codeExecution/codeExecutionSlice';
 
 export const store = configureStore({
   reducer: {
@@ -28,5 +29,6 @@ export const store = configureStore({
     assessments: assessmentReducer,
     search: searchReducer,
     notifications: notificationReducer, 
+     codeExecution: codeExecutionReducer, 
   },
 });

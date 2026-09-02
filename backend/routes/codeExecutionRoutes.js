@@ -16,6 +16,9 @@ const {
     validateCodeExecution
 } = require("../validations/codeExecutionValidation");
 
+const { practiceRun } = require("../controllers/codeExecutionController");
+router.post("/practice-run", practiceRun);
+
 
 // ----------------------------------------------------
 // Swagger

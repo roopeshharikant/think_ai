@@ -5,33 +5,84 @@ const { Server } = require("socket.io");
 
 const app = require("./app");
 
-const PORT = process.env.PORT || 5000;
+const { startWorker } =
+    require("./services/notificationQueueService");
 
-// Create HTTP server
+const initSockets =
+    require("./sockets/index");
+
+const initLiveSocket =
+    require("./src/live/liveSocket");
+
+// ============================================================
+// HTTP SERVER
+// ============================================================
+
 const httpServer = http.createServer(app);
 
-// Socket.IO
+// ============================================================
+// SOCKET.IO
+// ============================================================
+
 const io = new Server(httpServer, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
-  }
+    cors: {
+        origin: "*",
+        methods: [
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+        ]
+    }
 });
 
-// Make Socket.IO available in Express
+// Make Socket.IO available to Express
 app.set("io", io);
 
-// Health check
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    service: "think-ai-backend"
-  });
-});
+// Initialize Socket handlers
+initSockets(io);
+initLiveSocket(io);
 
-// Start server
-httpServer.listen(PORT, "127.0.0.1", () => {
-  console.log(`Thinkz AI backend running on port ${PORT}`);
-});
+// ============================================================
+// PORT
+// ============================================================
+
+const PORT = process.env.PORT || 5000;
+
+// ============================================================
+// START SERVER
+// ============================================================
+
+httpServer.listen(
+    PORT,
+    "127.0.0.1",
+    () => {
+        console.log("==============================================");
+        console.log(
+            `Thinkz LMS Backend running on port ${PORT}`
+        );
+        console.log(
+            `Swagger: http://localhost:${PORT}/api-docs`
+        );
+        console.log(
+            `Health: http://localhost:${PORT}/api/health`
+        );
+        console.log(
+            "[socket] Socket.IO attached and listening"
+        );
+        console.log("==============================================");
+    }
+);
+
+// ============================================================
+// NOTIFICATION WORKER
+// ============================================================
+
+startWorker();
+
+// ============================================================
+// EXPORT
+// ============================================================
 
 module.exports = httpServer;

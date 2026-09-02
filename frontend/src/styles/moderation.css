@@ -1,0 +1,182 @@
+/* ============================================================
+   Moderation dashboard styles — self-contained.
+   ============================================================ */
+
+.moderation-page {
+  min-height: 100vh;
+  background: var(--forum-bg, #0b0f19);
+  color: var(--forum-text, #e6eaf5);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.moderation-container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px 14px 64px;
+  box-sizing: border-box;
+}
+
+.moderation-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.moderation-header h1 { font-size: 1.35rem; margin: 0; flex: 1; }
+
+.moderation-sections {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .moderation-sections {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+
+@media (min-width: 768px) {
+  .moderation-container { padding: 24px 20px 64px; }
+}
+
+@media (min-width: 1440px) {
+  .moderation-container { max-width: 1200px; }
+}
+
+.moderation-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.rich-editor__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--forum-border, #2a3555);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  padding: 6px 8px;
+  background: var(--forum-surface-2, #1c2440);
+}
+
+.rich-editor__textarea {
+  border-radius: 0 0 12px 12px;
+}
+
+.rich-editor__preview {
+  background: var(--forum-surface-2, #1c2440);
+  border: 1px solid var(--forum-border, #2a3555);
+  border-radius: 0 0 12px 12px;
+  padding: 12px 14px;
+  min-height: 110px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.prefs-panel label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.86rem;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background: #333d5e;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  background: #cdd5ea;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+
+.switch.is-on { background: var(--forum-accent, #6366f1); }
+.switch.is-on::after { transform: translateX(18px); }
+
+@media (max-width: 375px) {
+  .moderation-container { padding: 16px 10px 48px; }
+}
+
+/* Moderation toasts reuse the shared toast styles; accent the shield type. */
+.notification-toast--moderation {
+  border-color: var(--forum-warning, #f59e0b);
+}
+
+/* ---------- confirmation dialog ---------- */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(4, 6, 12, 0.72);
+  backdrop-filter: blur(2px);
+  box-sizing: border-box;
+}
+
+.confirm-dialog {
+  width: 100%;
+  max-width: 380px;
+  background: var(--forum-surface, #141a2b);
+  border: 1px solid var(--forum-border, #2a3555);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-sizing: border-box;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+  animation: confirm-in 0.16s ease-out;
+}
+
+@keyframes confirm-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.confirm-dialog__title {
+  font-size: 1.05rem;
+  margin: 0 0 6px;
+  color: var(--forum-text, #e6eaf5);
+}
+
+.confirm-dialog__message {
+  font-size: 0.87rem;
+  line-height: 1.5;
+  margin: 0 0 16px;
+  color: var(--forum-text-dim, #93a0bf);
+}
+
+.confirm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 375px) {
+  .confirm-dialog { max-width: none; padding: 16px; }
+}

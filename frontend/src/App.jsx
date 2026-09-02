@@ -1,16 +1,23 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./components/ThemeContext";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import LandingPage from "./pages/public/Landingpage";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
-import AppRoutes from "./routes/AppRoutes";
 import LearnerRoutes from "./routes/LearnerRoutes";
 import AdminRoutes from "./routes/AdminRoutes";
+import InstructorRoutes from "./routes/InstructorRoutes";
+import { fetchCurrentUser } from "./features/auth/authSlice";
+import useSessionTimeout from "./hooks/useSessionTimeout";
+
+import ForumModuleRoutes from "./routes/ForumModuleRoutes";
+import LiveClassStudio from "./pages/liveStudio/LiveClassStudio";
 
 function RolePlaceholder({ label }) {
   return (
@@ -25,13 +32,15 @@ function RolePlaceholder({ label }) {
 function App() {
   const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  // Automatically check token expiry state
+  useSessionTimeout();
 
   useEffect(() => {
-    if (token && !isAuthenticated) {
+    if (token) {
       dispatch(fetchCurrentUser());
     }
-  }, [dispatch, token, isAuthenticated]);
+  }, [dispatch, token]);
 
   return (
     <ThemeProvider>
@@ -59,6 +68,15 @@ function App() {
       <Route
         path="/register"
         element={<RegisterPage />}
+      />
+
+      {/* =========================
+          FORUM MODULE (self-contained — mock auth, no other-module deps)
+      ========================= */}
+
+      <Route
+        path="/forum/*"
+        element={<ForumModuleRoutes />}
       />
 
       <Route
@@ -130,6 +148,119 @@ function App() {
       />
 
     </Routes>
+      <Routes>
+
+        {/* =========================
+            PUBLIC ROUTES
+        ========================= */}
+        <Route
+          path="/"
+          element={<LandingPage />}
+        />
+
+        <Route
+          path="/home"
+          element={<LandingPage />}
+        />
+
+        <Route
+          path="/login"
+          element={<LoginPage />}
+        />
+
+        <Route
+          path="/register"
+          element={<RegisterPage />}
+        />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPasswordPage />}
+        />
+
+        <Route
+          path="/reset-password/:token"
+          element={<ResetPasswordPage />}
+        />
+
+        {/* =========================
+            FORUM MODULE
+        ========================= */}
+        <Route
+          path="/forum/*"
+          element={<ForumModuleRoutes />}
+        />
+
+        <Route
+          path="/org-login"
+          element={
+            <RolePlaceholder label="Organization Login" />
+          }
+        />
+
+        {/* =========================
+            ADMIN
+        ========================= */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <AdminRoutes />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* =========================
+            LEARNER
+        ========================= */}
+        <Route
+          path="/learner/*"
+          element={
+            <ProtectedRoute allowedRoles={["Learner", "Admin"]}>
+              <LearnerRoutes />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* =========================
+            INSTRUCTOR
+        ========================= */}
+        <Route
+          path="/instructor/*"
+          element={
+            <ProtectedRoute allowedRoles={["Instructor", "Admin"]}>
+              <InstructorRoutes />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* =========================
+            TA
+        ========================= */}
+        <Route
+          path="/ta/*"
+          element={
+            <ProtectedRoute allowedRoles={["TA", "Admin"]}>
+              <RolePlaceholder label="TA" />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* =========================
+            404
+        ========================= */}
+        <Route
+          path="*"
+          element={<Navigate to="/login" replace />}
+        />
+        <Route path="/live-studio/:sessionId?"
+          element={
+            <ProtectedRoute allowedRoles={["Instructor", "Admin", "Learner"]}>
+              <LiveClassStudio />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </ThemeProvider>
   );
 }

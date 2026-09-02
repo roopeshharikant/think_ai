@@ -582,17 +582,45 @@ const gradingCallback = async (
     }
 };
 
+const practiceRun = async (req, res) => {
+  try {
+    const { language, code, stdin } = req.body;
 
-// ============================================================
-// EXPORTS
-// ============================================================
+    if (typeof language !== "string" || !language.trim()) {
+      return res.status(400).json({ success: false, message: "Programming language is required" });
+    }
+    if (typeof code !== "string" || !code.trim()) {
+      return res.status(400).json({ success: false, message: "Source code is required" });
+    }
+    if (stdin !== undefined && stdin !== null && typeof stdin !== "string") {
+      return res.status(400).json({ success: false, message: "stdin must be a string" });
+    }
 
-module.exports = {
+    // No submissionId, no callbackUrl — nothing is persisted.
+    const result = await codeExecutionService.executeCode({
+      language,
+      code,
+      stdin: stdin || "",
+    });
 
-    executeCode,
+    return res.status(200).json({ success: true, message: "Code execution completed", data: result.data });
 
-    submitCode,
+  } catch (error) {
+    console.error("Practice run error:", error);
+    const message = error?.message || "Code execution failed";
 
-    gradingCallback
-
+    if (message.includes("Programming language is required") || message.includes("Unsupported language") ||
+        message.includes("Source code is required") || message.includes("stdin must be a string")) {
+      return res.status(400).json({ success: false, message });
+    }
+    if (message.includes("JUDGE0_URL is not configured")) {
+      return res.status(503).json({ success: false, message });
+    }
+    if (message.includes("Judge0")) {
+      return res.status(502).json({ success: false, message });
+    }
+    return res.status(500).json({ success: false, message: "Code execution service failed" });
+  }
 };
+
+module.exports = { executeCode, submitCode, gradingCallback, practiceRun };
