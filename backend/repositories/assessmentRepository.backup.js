@@ -145,14 +145,60 @@ const createAssessment = async (data) => {
         }
 
         return questionData;
-    });
+    };
+
+            if (
+                !question ||
+                typeof question !== "object"
+            ) {
+                throw new Error(
+                    `Invalid question at position ${index + 1}`
+                );
+            }
 
 
-    /*
-     * ============================================================
-     * CREATE ASSESSMENT
-     * ============================================================
-     */
+            if (
+                typeof question.questionText !== "string" ||
+                !question.questionText.trim()
+            ) {
+                throw new Error(
+                    `Question ${index + 1} text is required`
+                );
+            }
+
+
+            const questionType =
+                question.questionType || "MCQ";
+
+
+            if (
+                !["MCQ", "CODING"].includes(
+                    questionType
+                )
+            ) {
+                throw new Error(
+                    `Invalid question type for question ${index + 1}`
+                );
+            }
+
+
+            const marks =
+                Number(question.marks);
+
+
+            if (
+                !Number.isFinite(marks) ||
+                marks <= 0
+            ) {
+                throw new Error(
+                    `Question ${index + 1} marks must be greater than 0`
+                );
+            }
+
+
+            /*
+             * ==================================================
+             * COMMON QUESTION DATA
 
     return await prisma.assessment.create({
 
@@ -1198,9 +1244,6 @@ const recalculateCodingQuestionScore = async (submissionId, questionId) => {
             submissionId: parsedSubmissionId,
             questionId: parsedQuestionId
         },
-
-        data: updateData,
-
         include: {
             testCase: true
         },
