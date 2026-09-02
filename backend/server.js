@@ -5,10 +5,12 @@ const { Server } = require("socket.io");
 
 const app = require("./app");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
+// Create HTTP server
 const httpServer = http.createServer(app);
 
+// Socket.IO
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
@@ -16,19 +18,20 @@ const io = new Server(httpServer, {
   }
 });
 
+// Make Socket.IO available in Express
 app.set("io", io);
 
+// Health check
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    service: "think-ai-backend"
+  });
+});
+
+// Start server
 httpServer.listen(PORT, "127.0.0.1", () => {
   console.log(`Thinkz AI backend running on port ${PORT}`);
-});
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'ok',
-        service: 'think-ai-backend'
-    });
-});
-server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
 });
 
 module.exports = httpServer;
