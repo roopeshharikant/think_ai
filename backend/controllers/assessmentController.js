@@ -1,4 +1,4 @@
-const service = require("../services/assessmentService");
+﻿const service = require("../services/assessmentService");
 
 // ============================================================
 // VALIDATION HELPERS
@@ -591,9 +591,18 @@ const getAssessmentSubmissions = async (req, res) => {
                 success: false,
                 message: error.message
             });
-        }
+           }
+
+        };
 
 // ============================================================
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+
+
 // ADMIN - CREATE CODING QUESTION
 // ============================================================
 
@@ -621,40 +630,6 @@ const createCodingQuestion = async (
 
     } catch (error) {
 
-        console.error(
-            "Create coding question error:",
-            error
-        );
-
-        return sendControllerError(
-            res,
-            error,
-            [
-                "Assessment not found"
-            ]
-        );
-    }
-};
-
-
-// ============================================================
-// ADMIN - CREATE CODING QUESTION
-// ============================================================
-
-const createCodingQuestion = async (req, res) => {
-    try {
-        const question =
-            await service.createCodingQuestion(
-                req.body
-            );
-
-        return res.status(201).json({
-            success: true,
-            message: "Coding question created successfully",
-            data: question
-        });
-
-    } catch (error) {
         console.error(
             "Create coding question error:",
             error
@@ -969,5 +944,5 @@ module.exports = {
     createCodingTestCase,
     getCodingTestCases,
     updateCodingTestCase,
-    deleteCodingTestCase
+    deleteCodingTestCase,
 };

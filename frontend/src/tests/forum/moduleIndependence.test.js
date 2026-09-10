@@ -45,7 +45,7 @@ const FORBIDDEN = [
     /store\//
 ];
 
-const ALLOWED_PREFIXES = ["react", "react-dom", "react-router", "socket.io-client"];
+const ALLOWED_PREFIXES = ["react", "react-dom", "react-router", "socket.io-client", "lucide-react"];
 
 function collectFiles(target, acc = []) {
     const stat = statSync(target);

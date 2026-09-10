@@ -215,7 +215,7 @@ export default function InstructorLayout() {
         )}
       </header>
 
-      <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 overflow-y-auto overflow-x-hidden">
+      <main className="min-h-0 flex-1 w-full px-4 sm:px-6 lg:px-8 py-6 overflow-y-auto overflow-x-hidden">
         <Outlet />
       </main>
 
