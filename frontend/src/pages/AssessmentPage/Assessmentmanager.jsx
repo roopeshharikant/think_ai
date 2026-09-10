@@ -195,7 +195,7 @@ export default function AssessmentManager({ initialCourseId = null }) {
 
   return (
     <div
-      className="min-h-screen w-full bg-gradient-to-br from-[#F6F5F1] via-[#EFECE6] to-[#E5E2D9] dark:from-[#0b0f17] dark:via-[#111827] dark:to-[#0f172a] text-slate-900 dark:text-[#f1f3f9] transition-colors duration-500 font-sans"
+      className="min-h-full w-full bg-gradient-to-br from-[#F6F5F1] via-[#EFECE6] to-[#E5E2D9] dark:from-[#0b0f17] dark:via-[#111827] dark:to-[#0f172a] text-slate-900 dark:text-[#f1f3f9] transition-colors duration-500 font-sans"
       style={{ fontFamily: "Inter, sans-serif" }}
     >
       <style>{FONT_IMPORT}</style>

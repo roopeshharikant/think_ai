@@ -9,7 +9,7 @@
     "dev": "nodemon server.js",
     "lint": "node --check server.js && node --check app.js",
     "build": "node --check server.js && node --check app.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test auditLogService.test.js emailIntegration.test.js notificationPreferenceService.test.js roleHierarchy.test.js roleMatrix.test.js"
   },
   "keywords": [],
   "author": "",

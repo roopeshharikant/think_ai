@@ -54,7 +54,6 @@ require("./config/passport");
 // DATABASE CONFIG
 // ============================================================
 
-// Keep this if your project uses this DB configuration.
 require("./config/db");
 
 // ============================================================
@@ -122,7 +121,21 @@ const swaggerOptions = {
             {
                 url: "http://localhost:5000"
             }
-        ]
+        ],
+
+        // ====================================================
+        // JWT AUTHENTICATION
+        // ====================================================
+
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT"
+                }
+            }
+        }
     },
 
     apis: [
@@ -224,7 +237,6 @@ app.use(
 // ADDITIONAL PROJECT ROUTES
 // ============================================================
 
-// Keep this only if ./src/routes actually exists in your project.
 app.use("/api", require("./src/routes"));
 
 // ============================================================
